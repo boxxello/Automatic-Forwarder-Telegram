@@ -1,0 +1,1 @@
+<telethon.events.messageedited.MessageEdited.Event object at 0x000001969A00E190>

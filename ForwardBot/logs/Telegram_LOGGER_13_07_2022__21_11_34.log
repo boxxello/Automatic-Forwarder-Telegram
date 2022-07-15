@@ -1,0 +1,14 @@
+2022-07-13 21:11:38,294 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 21:11:38,295 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 21:11:38,295 | INFO | telegram | gruppo_test 
+2022-07-13 21:11:38,295 | INFO | telegram | gruppo_test chat found. 
+2022-07-13 21:11:39,977 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 21:11:39,977 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 21:11:39,977 | INFO | telegram | gruppo_test 
+2022-07-13 21:11:39,977 | INFO | telegram | channel_test_mio 
+2022-07-13 21:11:39,978 | INFO | telegram | channel_test_mio chat found. 
+2022-07-13 21:11:40,037 | INFO | telegram | Database connected 
+2022-07-13 21:11:40,053 | INFO | telegram | Db name mongodb_pyrogram, collection names ['collezione_get'] 
+2022-07-13 21:11:40,928 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 
+2022-07-13 21:11:41,014 | INFO | telegram | Couldn't get all the previous messages from chat gruppo_test 
+2022-07-13 21:11:41,014 | INFO | telegram | 'int' object has no attribute '__dict__' 

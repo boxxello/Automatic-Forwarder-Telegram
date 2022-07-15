@@ -1,0 +1,2 @@
+2022-07-13 17:37:45,414 | INFO | telegram | CHANNEL_NAME_CLIENT environment variable isn't a valid entity. Check your environment file. 
+2022-07-13 17:37:45,414 | INFO | telegram | argument of type 'NoneType' is not iterable 

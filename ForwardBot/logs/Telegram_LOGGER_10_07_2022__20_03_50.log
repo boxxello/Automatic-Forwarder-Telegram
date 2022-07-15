@@ -1,0 +1,14 @@
+2022-07-10 20:03:51,494 | INFO | telegram | gruppo_test chat found. 
+2022-07-10 20:03:52,479 | INFO | telegram | channel_test_mio chat found. 
+2022-07-10 20:03:52,488 | INFO | telegram | Database connected 
+2022-07-10 20:03:52,520 | INFO | telegram | Db name mongodb_db_msg, collection names ['collezione_fw', 'collezione_get'] 
+2022-07-10 20:03:52,686 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 
+2022-07-10 20:03:54,087 | INFO | telegram | Plugin modules to load: ['count', 'forward', 'get_symb_ignore', 'github', 'help', 'join', 'ping_speed', 'system_stats', 'whois', 'zipfile'] 
+2022-07-10 20:03:54,088 | INFO | telegram | Utils modules no bot to load: ['utils_no'] 
+2022-07-10 20:03:54,296 | INFO | telegram | FOUND FILE TO RETRIEVE SYMBOLS FROM C:\Users\boxxo\PycharmProjects\forward_bot\ForwardBot\assets_to_ignore.txt 
+2022-07-10 20:03:54,296 | INFO | telegram | {'glossary': {'PATTERN1': {'prefix': 'NUOVA IDEA DI TRADING 📈 \n\n', 'suffix': '\n\n⚠️ Questo messaggio non costituisce un consiglio di investimento ed è esclusivamente a scopo didattico ⚠️️\n'}, 'PATTERN2': {'prefix': '', 'suffix': ''}, 'PATTERN3': {'prefix': '', 'suffix': ''}, 'PATTERN4': {'prefix': '', 'suffix': ''}, 'PATTERN5': {'prefix': '', 'suffix': ''}, 'PATTERN6': {'prefix': '', 'suffix': ''}, 'PATTERN7': {'prefix': '', 'suffix': ''}, 'PATTERN8': {'prefix': '', 'suffix': ''}}} 
+2022-07-10 20:03:54,297 | INFO | telegram | Successfully loaded 9 symbols to discard: ['EURJPY', 'USDJPY', 'GBPJPY', 'AUDJPY', 'CHFJPY', 'CADJPY', 'NZDJPY', 'USDMXN', 'GOLD'] 
+2022-07-10 20:03:54,297 | INFO | telegram | FOUND FILE TO RETRIEVE BLACKLIST FROM C:\Users\boxxo\PycharmProjects\forward_bot\ForwardBot\blacklist.txt 
+2022-07-10 20:03:54,298 | INFO | telegram | Successfully loaded 1 words to discard: ['SCALPING'] 
+2022-07-10 20:03:54,361 | INFO | telegram | Attempting to run bot 
+2022-07-10 20:05:57,484 | INFO | telegram | 1792220825 tried to send a command, but he's not a sudo user 

@@ -1,0 +1,140 @@
+2022-07-13 19:50:25,177 | INFO | telegram | gruppo_test 
+2022-07-13 19:50:27,142 | INFO | telegram | {
+    "_": "Dialog",
+    "chat": {
+        "_": "Chat",
+        "id": -1001284325013,
+        "type": "ChatType.CHANNEL",
+        "is_verified": false,
+        "is_restricted": false,
+        "is_creator": false,
+        "is_scam": false,
+        "is_fake": false,
+        "title": "FXL ROOM VIP Channel",
+        "photo": {
+            "_": "ChatPhoto",
+            "small_file_id": "AQADBAADVLoxG67BwFIAEAIAA2uxzd4W____ay8w9_zIkr4ABB4E",
+            "small_photo_unique_id": "AgADVLoxG67BwFI",
+            "big_file_id": "AQADBAADVLoxG67BwFIAEAMAA2uxzd4W____ay8w9_zIkr4ABB4E",
+            "big_photo_unique_id": "AgADVLoxG67BwFI"
+        },
+        "dc_id": 4,
+        "has_protected_content": false,
+        "members_count": 218
+    },
+    "top_message": {
+        "_": "Message",
+        "id": 6688,
+        "sender_chat": {
+            "_": "Chat",
+            "id": -1001284325013,
+            "type": "ChatType.CHANNEL",
+            "is_verified": false,
+            "is_restricted": false,
+            "is_creator": false,
+            "is_scam": false,
+            "is_fake": false,
+            "title": "FXL ROOM VIP Channel",
+            "photo": {
+                "_": "ChatPhoto",
+                "small_file_id": "AQADBAADVLoxG67BwFIAEAIAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                "small_photo_unique_id": "AgADVLoxG67BwFI",
+                "big_file_id": "AQADBAADVLoxG67BwFIAEAMAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                "big_photo_unique_id": "AgADVLoxG67BwFI"
+            },
+            "dc_id": 4,
+            "has_protected_content": false,
+            "members_count": 218
+        },
+        "date": "2022-07-13 17:41:52",
+        "chat": {
+            "_": "Chat",
+            "id": -1001284325013,
+            "type": "ChatType.CHANNEL",
+            "is_verified": false,
+            "is_restricted": false,
+            "is_creator": false,
+            "is_scam": false,
+            "is_fake": false,
+            "title": "FXL ROOM VIP Channel",
+            "photo": {
+                "_": "ChatPhoto",
+                "small_file_id": "AQADBAADVLoxG67BwFIAEAIAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                "small_photo_unique_id": "AgADVLoxG67BwFI",
+                "big_file_id": "AQADBAADVLoxG67BwFIAEAMAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                "big_photo_unique_id": "AgADVLoxG67BwFI"
+            },
+            "dc_id": 4,
+            "has_protected_content": false,
+            "members_count": 218
+        },
+        "reply_to_message_id": 6677,
+        "reply_to_message": {
+            "_": "Message",
+            "id": 6677,
+            "sender_chat": {
+                "_": "Chat",
+                "id": -1001284325013,
+                "type": "ChatType.CHANNEL",
+                "is_verified": false,
+                "is_restricted": false,
+                "is_creator": false,
+                "is_scam": false,
+                "is_fake": false,
+                "title": "FXL ROOM VIP Channel",
+                "photo": {
+                    "_": "ChatPhoto",
+                    "small_file_id": "AQADBAADVLoxG67BwFIAEAIAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                    "small_photo_unique_id": "AgADVLoxG67BwFI",
+                    "big_file_id": "AQADBAADVLoxG67BwFIAEAMAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                    "big_photo_unique_id": "AgADVLoxG67BwFI"
+                },
+                "dc_id": 4,
+                "has_protected_content": false
+            },
+            "date": "2022-07-13 14:46:13",
+            "chat": {
+                "_": "Chat",
+                "id": -1001284325013,
+                "type": "ChatType.CHANNEL",
+                "is_verified": false,
+                "is_restricted": false,
+                "is_creator": false,
+                "is_scam": false,
+                "is_fake": false,
+                "title": "FXL ROOM VIP Channel",
+                "photo": {
+                    "_": "ChatPhoto",
+                    "small_file_id": "AQADBAADVLoxG67BwFIAEAIAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                    "small_photo_unique_id": "AgADVLoxG67BwFI",
+                    "big_file_id": "AQADBAADVLoxG67BwFIAEAMAA2uxzd4W____ay8w9_zIkr4ABB4E",
+                    "big_photo_unique_id": "AgADVLoxG67BwFI"
+                },
+                "dc_id": 4,
+                "has_protected_content": false
+            },
+            "mentioned": false,
+            "scheduled": false,
+            "from_scheduled": false,
+            "edit_date": "2022-07-13 16:19:58",
+            "has_protected_content": false,
+            "text": "NUOVA IDEA DI TRADING 📈 \n\nAUDUSD BUY 0.67340\nSL 0.67103\n\nIntra-Day Trade\n\n⚠️ Questo messaggio non costituisce un consiglio di investimento ed è esclusivamente a scopo didattico ⚠️️",
+            "views": 58,
+            "outgoing": false
+        },
+        "mentioned": false,
+        "scheduled": false,
+        "from_scheduled": false,
+        "edit_date": "2022-07-13 17:43:49",
+        "has_protected_content": false,
+        "text": "AUDUSD Closed 70+ Pips ✅✅",
+        "views": 37,
+        "outgoing": false
+    },
+    "unread_messages_count": 0,
+    "unread_mentions_count": 0,
+    "unread_mark": false,
+    "is_pinned": true
+} 
+2022-07-13 19:50:27,153 | INFO | telegram | CHANNEL_NAME_CLIENT environment variable isn't a valid entity. Check your environment file. 
+2022-07-13 19:50:27,153 | INFO | telegram | argument of type 'NoneType' is not iterable 

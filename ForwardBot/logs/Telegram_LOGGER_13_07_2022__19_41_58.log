@@ -1,0 +1,3 @@
+2022-07-13 19:42:00,975 | INFO | telegram | Database connected 
+2022-07-13 19:42:00,998 | INFO | telegram | Db name mongodb_pyrogram, collection names [] 
+2022-07-13 19:42:01,837 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 

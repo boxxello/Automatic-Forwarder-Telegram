@@ -1,0 +1,15 @@
+2022-07-13 20:45:45,132 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 20:45:45,132 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 20:45:45,132 | INFO | telegram | gruppo_test 
+2022-07-13 20:45:45,132 | INFO | telegram | gruppo_test chat found. 
+2022-07-13 20:45:46,415 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 20:45:46,415 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 20:45:46,416 | INFO | telegram | gruppo_test 
+2022-07-13 20:45:46,416 | INFO | telegram | channel_test_mio 
+2022-07-13 20:45:46,416 | INFO | telegram | channel_test_mio chat found. 
+2022-07-13 20:45:46,448 | INFO | telegram | Database connected 
+2022-07-13 20:45:46,479 | INFO | telegram | Db name mongodb_pyrogram, collection names ['collezione_get'] 
+2022-07-13 20:45:47,160 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 
+2022-07-13 20:45:47,160 | INFO | telegram | -1001624457188 
+2022-07-13 20:45:47,422 | INFO | telegram | Plugin modules to load: ['count', 'forward', 'get_symb_ignore', 'github', 'help', 'join', 'ping_speed', 'system_stats', 'whois', 'zipfile'] 
+2022-07-13 20:45:47,423 | INFO | telegram | Utils modules no bot to load: ['utils_no'] 

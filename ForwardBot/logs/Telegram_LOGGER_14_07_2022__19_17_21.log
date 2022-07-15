@@ -1,0 +1,191 @@
+2022-07-14 19:17:24,520 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-14 19:17:24,520 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-14 19:17:24,520 | INFO | telegram | gruppo_test 
+2022-07-14 19:17:24,520 | INFO | telegram | gruppo_test chat found. 
+2022-07-14 19:17:25,971 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-14 19:17:25,971 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-14 19:17:25,971 | INFO | telegram | gruppo_test 
+2022-07-14 19:17:25,971 | INFO | telegram | channel_test_mio 
+2022-07-14 19:17:25,972 | INFO | telegram | channel_test_mio chat found. 
+2022-07-14 19:17:26,015 | INFO | telegram | Database connected 
+2022-07-14 19:17:26,030 | INFO | telegram | Db name mongodb_pyrogram, collection names ['collezione_get'] 
+2022-07-14 19:17:26,818 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 
+2022-07-14 19:17:27,150 | INFO | telegram | {
+    "_": "Message",
+    "id": 212,
+    "sender_chat": {
+        "_": "Chat",
+        "id": -1001624457188,
+        "type": "ChatType.CHANNEL",
+        "is_verified": false,
+        "is_restricted": false,
+        "is_creator": true,
+        "is_scam": false,
+        "is_fake": false,
+        "title": "gruppo_test",
+        "has_protected_content": false
+    },
+    "date": "2022-07-14 01:38:30",
+    "chat": {
+        "_": "Chat",
+        "id": -1001624457188,
+        "type": "ChatType.CHANNEL",
+        "is_verified": false,
+        "is_restricted": false,
+        "is_creator": true,
+        "is_scam": false,
+        "is_fake": false,
+        "title": "gruppo_test",
+        "has_protected_content": false
+    },
+    "mentioned": false,
+    "scheduled": false,
+    "from_scheduled": false,
+    "media": "MessageMediaType.STICKER",
+    "has_protected_content": false,
+    "sticker": {
+        "_": "Sticker",
+        "file_id": "CAACAgIAAx0EYNM_5AAD1GLQT6bfMkBWhKGlETMas-eLvYT0AALFAwACnNbnClsqgl__YWWaHgQ",
+        "file_unique_id": "AgADxQMAApzW5wo",
+        "file_name": "sticker.webp",
+        "mime_type": "image/webp",
+        "file_size": 64332,
+        "date": "2018-12-11 13:19:58",
+        "width": 512,
+        "height": 512,
+        "is_animated": false,
+        "is_video": false,
+        "emoji": "😂",
+        "set_name": "MrSnoopDogg",
+        "thumbs": [
+            {
+                "_": "Thumbnail",
+                "file_id": "AAMCAgADHQRg0z_kAAPUYtBPpt8yQFaEoaURMxqz54u9hPQAAsUDAAKc1ucKWyqCX_9hZZoACAEAB20ABx4E",
+                "file_unique_id": "AgADxQMAApzW5wo",
+                "width": 128,
+                "height": 128,
+                "file_size": 7650
+            }
+        ]
+    },
+    "views": 1,
+    "outgoing": true
+} 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'pyrogram.client.Client'> Value: <pyrogram.client.Client object at 0x000002656AB11100>, Key type: <class 'str'>, Key val _client 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'int'> Value: 212, Key type: <class 'str'>, Key val id 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val from_user 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'pyrogram.types.user_and_chats.chat.Chat'> Value: {
+    "_": "Chat",
+    "id": -1001624457188,
+    "type": "ChatType.CHANNEL",
+    "is_verified": false,
+    "is_restricted": false,
+    "is_creator": true,
+    "is_scam": false,
+    "is_fake": false,
+    "title": "gruppo_test",
+    "has_protected_content": false
+}, Key type: <class 'str'>, Key val sender_chat 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'datetime.datetime'> Value: 2022-07-14 01:38:30, Key type: <class 'str'>, Key val date 
+2022-07-14 19:17:27,151 | INFO | telegram | Value type: <class 'pyrogram.types.user_and_chats.chat.Chat'> Value: {
+    "_": "Chat",
+    "id": -1001624457188,
+    "type": "ChatType.CHANNEL",
+    "is_verified": false,
+    "is_restricted": false,
+    "is_creator": true,
+    "is_scam": false,
+    "is_fake": false,
+    "title": "gruppo_test",
+    "has_protected_content": false
+}, Key type: <class 'str'>, Key val chat 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_from 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_sender_name 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_from_chat 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_from_message_id 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_signature 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val forward_date 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val reply_to_message_id 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val reply_to_top_message_id 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val reply_to_message 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'bool'> Value: False, Key type: <class 'str'>, Key val mentioned 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val empty 
+2022-07-14 19:17:27,152 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val service 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'bool'> Value: False, Key type: <class 'str'>, Key val scheduled 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'bool'> Value: False, Key type: <class 'str'>, Key val from_scheduled 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <enum 'MessageMediaType'> Value: MessageMediaType.STICKER, Key type: <class 'str'>, Key val media 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val edit_date 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val media_group_id 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val author_signature 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'bool'> Value: False, Key type: <class 'str'>, Key val has_protected_content 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val text 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val entities 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val caption_entities 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val audio 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val document 
+2022-07-14 19:17:27,153 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val photo 
+2022-07-14 19:17:27,154 | INFO | telegram | Value type: <class 'pyrogram.types.messages_and_media.sticker.Sticker'> Value: {
+    "_": "Sticker",
+    "file_id": "CAACAgIAAx0EYNM_5AAD1GLQT6bfMkBWhKGlETMas-eLvYT0AALFAwACnNbnClsqgl__YWWaHgQ",
+    "file_unique_id": "AgADxQMAApzW5wo",
+    "file_name": "sticker.webp",
+    "mime_type": "image/webp",
+    "file_size": 64332,
+    "date": "2018-12-11 13:19:58",
+    "width": 512,
+    "height": 512,
+    "is_animated": false,
+    "is_video": false,
+    "emoji": "😂",
+    "set_name": "MrSnoopDogg",
+    "thumbs": [
+        {
+            "_": "Thumbnail",
+            "file_id": "AAMCAgADHQRg0z_kAAPUYtBPpt8yQFaEoaURMxqz54u9hPQAAsUDAAKc1ucKWyqCX_9hZZoACAEAB20ABx4E",
+            "file_unique_id": "AgADxQMAApzW5wo",
+            "width": 128,
+            "height": 128,
+            "file_size": 7650
+        }
+    ]
+}, Key type: <class 'str'>, Key val sticker 
+2022-07-14 19:17:27,154 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val animation 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val game 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val voice 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video_note 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val caption 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val contact 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val location 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val venue 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val web_page 
+2022-07-14 19:17:27,155 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val poll 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val dice 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val new_chat_members 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val left_chat_member 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val new_chat_title 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val new_chat_photo 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val delete_chat_photo 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val group_chat_created 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val supergroup_chat_created 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val channel_chat_created 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val migrate_to_chat_id 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val migrate_from_chat_id 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val pinned_message 
+2022-07-14 19:17:27,156 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val game_high_score 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'int'> Value: 1, Key type: <class 'str'>, Key val views 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val via_bot 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'bool'> Value: True, Key type: <class 'str'>, Key val outgoing 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val matches 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val command 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val reply_markup 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video_chat_scheduled 
+2022-07-14 19:17:27,157 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video_chat_started 
+2022-07-14 19:17:27,158 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video_chat_ended 
+2022-07-14 19:17:27,158 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val video_chat_members_invited 
+2022-07-14 19:17:27,158 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val web_app_data 
+2022-07-14 19:17:27,158 | INFO | telegram | Value type: <class 'NoneType'> Value: None, Key type: <class 'str'>, Key val reactions 
+2022-07-14 19:17:27,158 | INFO | telegram | {'_client': <pyrogram.client.Client object at 0x000002656AB11100>, 'id': -1001624457188, 'from_user': None, 'type': pyrogram.enums.ChatType.CHANNEL, 'is_verified': False, 'is_restricted': False, 'is_creator': True, 'is_scam': False, 'is_fake': False, 'is_support': None, 'title': 'gruppo_test', 'username': None, 'first_name': None, 'last_name': None, 'photo': None, 'bio': None, 'description': None, 'dc_id': None, 'has_protected_content': False, 'invite_link': None, 'pinned_message': None, 'sticker_set_name': None, 'can_set_sticker_set': None, 'members_count': None, 'restrictions': None, 'permissions': None, 'distance': None, 'linked_chat': None, 'send_as_chat': None, 'available_reactions': None, 'date': datetime.datetime(2018, 12, 11, 13, 19, 58), 'forward_from': None, 'forward_sender_name': None, 'forward_from_chat': None, 'forward_from_message_id': None, 'forward_signature': None, 'forward_date': None, 'reply_to_message_id': None, 'reply_to_top_message_id': None, 'reply_to_message': None, 'mentioned': False, 'empty': None, 'service': None, 'scheduled': False, 'from_scheduled': False, 'media': pyrogram.enums.MessageMediaType.STICKER, 'edit_date': None, 'media_group_id': None, 'author_signature': None, 'text': None, 'entities': None, 'caption_entities': None, 'audio': None, 'document': None, 'file_id': 'CAACAgIAAx0EYNM_5AAD1GLQT6bfMkBWhKGlETMas-eLvYT0AALFAwACnNbnClsqgl__YWWaHgQ', 'file_unique_id': 'AgADxQMAApzW5wo', 'file_name': 'sticker.webp', 'mime_type': 'image/webp', 'file_size': 64332, 'width': 512, 'height': 512, 'is_animated': False, 'is_video': False, 'emoji': '😂', 'set_name': 'MrSnoopDogg', 'thumbs': [pyrogram.types.Thumbnail(file_id='AAMCAgADHQRg0z_kAAPUYtBPpt8yQFaEoaURMxqz54u9hPQAAsUDAAKc1ucKWyqCX_9hZZoACAEAB20ABx4E', file_unique_id='AgADxQMAApzW5wo', width=128, height=128, file_size=7650)], 'animation': None, 'game': None, 'video': None, 'voice': None, 'video_note': None, 'caption': None, 'contact': None, 'location': None, 'venue': None, 'web_page': None, 'poll': None, 'dice': None, 'new_chat_members': None, 'left_chat_member': None, 'new_chat_title': None, 'new_chat_photo': None, 'delete_chat_photo': None, 'group_chat_created': None, 'supergroup_chat_created': None, 'channel_chat_created': None, 'migrate_to_chat_id': None, 'migrate_from_chat_id': None, 'game_high_score': None, 'views': 1, 'via_bot': None, 'outgoing': True, 'matches': None, 'command': None, 'reply_markup': None, 'video_chat_scheduled': None, 'video_chat_started': None, 'video_chat_ended': None, 'video_chat_members_invited': None, 'web_app_data': None, 'reactions': None} 
+2022-07-14 19:17:27,158 | INFO | telegram | (<class 'pyrogram.types.object.Object'>, <class 'object'>) 
+2022-07-14 19:17:27,160 | INFO | telegram | Couldn't get all the previous messages from chat gruppo_test 
+2022-07-14 19:17:27,160 | INFO | telegram | cannot encode object: <pyrogram.client.Client object at 0x000002656AB11100>, of type: <class 'pyrogram.client.Client'> 

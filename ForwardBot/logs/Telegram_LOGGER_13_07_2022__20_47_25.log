@@ -1,0 +1,14 @@
+2022-07-13 20:47:28,623 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 20:47:28,623 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 20:47:28,623 | INFO | telegram | gruppo_test 
+2022-07-13 20:47:28,623 | INFO | telegram | gruppo_test chat found. 
+2022-07-13 20:47:29,863 | INFO | telegram | FXL ROOM VIP Channel 
+2022-07-13 20:47:29,863 | INFO | telegram | PriceError WarehouseDeals 
+2022-07-13 20:47:29,863 | INFO | telegram | gruppo_test 
+2022-07-13 20:47:29,863 | INFO | telegram | channel_test_mio 
+2022-07-13 20:47:29,863 | INFO | telegram | channel_test_mio chat found. 
+2022-07-13 20:47:29,894 | INFO | telegram | Database connected 
+2022-07-13 20:47:29,930 | INFO | telegram | Db name mongodb_pyrogram, collection names ['collezione_get'] 
+2022-07-13 20:47:30,618 | INFO | telegram | Attempting to retrieve old previous messages from chat gruppo_test 
+2022-07-13 20:47:30,780 | INFO | telegram | Couldn't get all the previous messages from chat gruppo_test 
+2022-07-13 20:47:30,780 | INFO | telegram | cannot encode object: pyrogram.types.Message(id=201, sender_chat=pyrogram.types.Chat(id=-1001624457188, type=pyrogram.enums.ChatType.CHANNEL, is_verified=False, is_restricted=False, is_creator=True, is_scam=False, is_fake=False, title='gruppo_test', has_protected_content=False), date=datetime.datetime(2022, 7, 10, 20, 15, 1), chat=pyrogram.types.Chat(id=-1001624457188, type=pyrogram.enums.ChatType.CHANNEL, is_verified=False, is_restricted=False, is_creator=True, is_scam=False, is_fake=False, title='gruppo_test', has_protected_content=False), mentioned=False, scheduled=False, from_scheduled=False, has_protected_content=False, text="It's  20:15  in Spain(Africa/Ceuta timezone).", entities=pyrogram.types.List([pyrogram.types.MessageEntity(type=pyrogram.enums.MessageEntityType.CODE, offset=0, length=4),pyrogram.types.MessageEntity(type=pyrogram.enums.MessageEntityType.BOLD, offset=6, length=5),pyrogram.types.MessageEntity(type=pyrogram.enums.MessageEntityType.CODE, offset=13, length=32)]), views=1, outgoing=True), of type: <class 'pyrogram.types.messages_and_media.message.Message'> 
