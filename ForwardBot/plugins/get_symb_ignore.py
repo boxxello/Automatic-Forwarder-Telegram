@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-import telethon
+import pyrogram
 
 from ForwardBot import bot, LOGS,  const_dirs_class, CMD_HELP
 from ForwardBot.SymbConfig import Symb_Config
@@ -11,30 +11,30 @@ from ForwardBot.utils_no_bot.utils_no import retrieve_symbols
 
 
 @register(incoming=True, pattern=r"^\.getsymbols(?: |$)(.*)")
-async def handler(event: telethon.events.newmessage.NewMessage):
+async def handler(event:  pyrogram.types.Message):
     LOGS.info(f"---Trying to get the symbols---")
     LOGS.info(f"Symbols to exclude: {Symb_Config.SYMB_TO_EXCLUDE}")
 
     list_to_string = '\n'.join(Symb_Config.SYMB_TO_EXCLUDE)
     if list_to_string == "" or list_to_string == None:
-        await bot.send_message(message="`•Current Symbols:`\nNone", entity=event.chat_id)
+        await bot.send_message(text="`•Current Symbols:`\nNone", chat_id=event.chat.id)
     else:
-        await bot.send_message(message="`•Current Symbols:`", entity=event.chat_id)
-        await bot.send_message(message=f"`{list_to_string}`", entity=event.chat_id)
+        await bot.send_message(text="`•Current Symbols:`", chat_id=event.chat.id)
+        await bot.send_message(text=f"`{list_to_string}`", chat_id=event.chat.id)
 
 
 @register(incoming=True, pattern=r"^\.symbignore(?: |$)(.*)")
-async def handler(event: telethon.events.newmessage.NewMessage):
+async def handler(event:  pyrogram.types.Message):
     LOGS.info(f"---Trying to change symbols to ignore---")
     list_to_string = '\n'.join(Symb_Config.SYMB_TO_EXCLUDE)
     current_symbols = f"Current symbols\n{list_to_string}"
     LOGS.info(f"{current_symbols}")
     if list_to_string == "" or list_to_string == None:
-        await bot.send_message(message="`•Current Symbols:`\nNone", entity=event.chat_id)
+        await bot.send_message(text="`•Current Symbols:`\nNone", chat_id=event.chat.id)
     else:
-        await bot.send_message(message="`•Current Symbols:`", entity=event.chat_id)
-        await bot.send_message(message=f"`{list_to_string}`", entity=event.chat_id)
-    input_symbols = Symb_Config.extractor.extract(event.message.text)
+        await bot.send_message(text="`•Current Symbols: `", chat_id=event.chat.id)
+        await bot.send_message(text=f"` {list_to_string} `", chat_id=event.chat.id)
+    input_symbols = Symb_Config.extractor.extract(event.text)
     LOGS.info(f"Opening file {Symb_Config.FILE_SYMB_EXCLUDE} to save input_symbols: {input_symbols}")
     try:
         with open(Symb_Config.FILE_SYMB_EXCLUDE, "w") as f:
@@ -45,10 +45,10 @@ async def handler(event: telethon.events.newmessage.NewMessage):
             os.path.join(const_dirs_class.CURR_DIR, Symb_Config.FILE_SYMB_EXCLUDE))
         LOGS.info(f"Retrieved symbols from file {Symb_Config.SYMB_TO_EXCLUDE}")
         list_to_string = '\n'.join(Symb_Config.SYMB_TO_EXCLUDE)
-        if list_to_string == "" or list_to_string == None:
-            await bot.send_message(message="`•New symbols`\n`None`", entity=event.chat_id)
+        if list_to_string == "" or list_to_string is None:
+            await bot.send_message(text="`•New symbols`\n`None`", chat_id=event.chat.id)
         else:
-            await bot.send_message(message=f"`New symbols:\n{list_to_string}`", entity=event.chat_id)
+            await bot.send_message(text=f"`New symbols:\n{list_to_string}`", chat_id=event.chat.id)
     except IOError as e:
         LOGS.error(f"I/O error({e.errno}): {e.strerror}")
     except:

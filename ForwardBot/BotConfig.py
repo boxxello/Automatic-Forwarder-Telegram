@@ -16,11 +16,10 @@ class Config(object):
     API_ID = int(environ.get("TELEGRAM_API_ID", None))
     SUDO_USERS_INT = environ["SUDO_USERS"].split(SEP)
     API_HASH = environ.get("TELEGRAM_API_HASH", None)
-
+    BOT_PREFIX=environ.get("BOT_PREFIX", None)
     CHANNEL_NAME_BOT = environ.get("CHANNEL_NAME_BOT", None)
     CHANNEL_NAME_CLIENT = environ.get("CHANNEL_NAME_CLIENT", None)
     SESSION_NAME_CLIENT = environ.get("SESSION_NAME_CLIENT", None)
-    SESSION_NAME_BOT = environ.get("SESSION_NAME_BOT", None)
     SUFFIX_KEY_ID_DBMS = environ.get("SUFFIX_KEY_ID_DBMS", "id_msg_fw_bef")
     CELLPHONE_NUMBER=environ.get("CELLPHONE_NUMBER", None)
     COMMAND_HAND_LER = environ.get("COMMAND_HAND_LER", "^/")

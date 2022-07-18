@@ -1,39 +1,44 @@
 import inspect
 import re
 
-from ForwardBot import bot, Config, LOGS,  collezione_get, collezione_fw
+import pyrogram
+from pyrogram import filters
+from pyrogram.filters import chat
+
+from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
+from ForwardBot.events import register, message_deleted
 
 
-@bot.on(telethon.events.NewMessage(incoming=True, chats=Config.CHANNEL_NAME_CLIENT))
-async def handler(event: telethon.events.newmessage.NewMessage):
+@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
+async def handler(event: pyrogram.types.Message):
     LOGS.info(f"NEW MESSAGE CAUGHT {event}")
     new_dictionary = {}
-    for key__, value__ in event.to_dict().items():
-        if isinstance(value__, telethon.tl.tlobject.TLObject):
-            new_dictionary.update(dict((key, value) for key, value in value__.to_dict().items() if
-                                       not callable(value__) and not key.startswith('__')))
+    if isinstance(event, pyrogram.types.Message):
+        new_dictionary = unwrap_dict(event)
+    LOGS.info(new_dictionary)
     LOGS.info(f"MESSAGE ACQUIRED {new_dictionary}")
-    if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('message')):
+    if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
         await collezione_get.insert_one(new_dictionary)
-        if event.message.is_reply:
+        #check if is reply
+        if new_dictionary.get('reply_to_message_id'):
             LOGS.info(f"CAUGHT REPLY")
-            the_Dict = await collezione_get.find_one({'id': new_dictionary.get('reply_to').get('reply_to_msg_id')})
+            the_Dict = await collezione_get.find_one({'id': new_dictionary.get('reply_to_message_id')})
             LOGS.info(f"Dict of the event that got a reply: {the_Dict}")
 
             other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
             if other_dict is not None:
                 LOGS.info(f"DICT OLD  MESSAGE  {other_dict}")
                 LOGS.info(
-                    f"It is a reply to the message id: {other_dict.get('id')}, text in the message: {other_dict.get('message')}")
-                await send_msg_if_pattern_match(new_dictionary["message"], new_dictionary["id"], True,
+                    f"It is a reply to the message id: {other_dict.get('id')}, text in the message: {other_dict.get('text')}")
+                await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], True,
                                                 other_dict.get('id'))
                 return
             else:
                 LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
                 return
 
-        await send_msg_if_pattern_match(new_dictionary["message"], new_dictionary["id"], False, "")
+        await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], False, "")
     else:
         LOGS.info("Command registered")
 
@@ -78,17 +83,17 @@ async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply:
         text_message = add_prefix_suffix(val_ret, text_message)
         LOGS.info(messageid)
         if not is_reply:
-            msgsent_ = await bot.send_message(message=text_message, entity=f'{Config.CHANNEL_NAME_BOT}')
+            msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}')
         else:
-            msgsent_ = await bot.send_message(message=text_message, entity=f'{Config.CHANNEL_NAME_BOT}',
-                                              reply_to=input_reply_message_id)
+            msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}',
+                                              reply_to_message_id=input_reply_message_id)
 
-        dict_event = msgsent_.to_dict()
+        dict_event = unwrap_dict(msgsent_)
         dict_event.update({Config.SUFFIX_KEY_ID_DBMS: messageid})
         LOGS.info(f"MESSAGE SENT {dict_event}")
         LOGS.info(f" {msgsent_}")
         await collezione_fw.insert_one(dict_event)
-        #BotConfig.Config.queue_latest_messages.appendleft(dict_event)
+        # BotConfig.Config.queue_latest_messages.appendleft(dict_event)
 
     else:
         LOGS.info("NO MATCH")
@@ -167,20 +172,16 @@ def check_for_pattern_match(event_text: str) -> tuple:
     return -1, event_text
 
 
-@bot.on(telethon.events.MessageEdited(incoming=True, chats=Config.CHANNEL_NAME_CLIENT))
-async def handler(event: telethon.events.messageedited.MessageEdited.Event):
+@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
+async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
     LOGS.info(event)
     try:
-        edited_message_real_dict = {}
-        edited_message_dict = event.to_dict()
 
-        for key__, value__ in edited_message_dict.items():
-            if isinstance(value__, telethon.tl.tlobject.TLObject):
-                edited_message_real_dict.update(dict((key, value) for key, value in value__.to_dict().items() if
-                                                     not callable(value__) and not key.startswith('__')))
+        edited_message_real_dict = unwrap_dict(event)
+
         LOGS.info(f"PRINTING EDITED MESSAGE {edited_message_real_dict}")
-        if (return_tuple_match := check_for_pattern_match(edited_message_real_dict.get('message'))) != (-1, None):
+        if (return_tuple_match := check_for_pattern_match(edited_message_real_dict.get('text'))) != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
             if (the_Dict := await collezione_fw.find_one(
@@ -193,9 +194,9 @@ async def handler(event: telethon.events.messageedited.MessageEdited.Event):
                 # here i try to edit the message on the end channel by the end channel id
                 text_message = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
                 await bot.edit_message(text=text_message, entity=Config.CHANNEL_NAME_BOT, message=the_Dict.get('id'))
-            
-                
-                    
+
+
+
             else:
                 LOGS.info(
                     f"NO MESSAGE WAS FOUND IN THE COLLECTION  TO EDIT BUT IT MATCHED THE PATTERN, SENDING THE MESSAGE")
@@ -206,32 +207,26 @@ async def handler(event: telethon.events.messageedited.MessageEdited.Event):
         LOGS.error(f"ERROR {e}")
         LOGS.info(f"----EXCEPTION THROWN, EDITED MESSAGE BLOCK FINISH----")
 
-
-        
-@bot.on(telethon.events.messagedeleted.MessageDeleted(chats=Config.CHANNEL_NAME_CLIENT))
-async def handler(event: telethon.events.messagedeleted.MessageDeleted.Event):
+## @bot.on_deleted_messages(filters=filters.chat(Config.CLIENT_CHANNEL_ID))
+@message_deleted(chat_id=Config.CLIENT_CHANNEL_ID)
+async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
     LOGS.info(event)
 
-    edited_message_real_dict = {}
-    edited_message_dict = event.to_dict()
-    LOGS.info(edited_message_dict)
-    for key__, value__ in edited_message_dict.items():
-        if isinstance(value__, telethon.tl.tlobject.TLObject):
-            edited_message_real_dict.update(dict((key, value) for key, value in value__.to_dict().items() if
-                                                 not callable(value__) and not key.startswith('__')))
-        else:
-            edited_message_real_dict.update({key__: value__})
-    chatname=await retrieve_chat_name(bot, edited_message_real_dict.get('channel_id'))
-    LOGS.info(
-        f"{len(edited_message_real_dict.get('deleted_ids'))} DELETED MESSAGES FROM CHAT NAME {chatname}, chat_id: {edited_message_real_dict.get('channel_id')}")
 
-    for idx, deleted_id in enumerate(edited_message_real_dict.get('deleted_ids')):
+    edited_message_real_dict = unwrap_dict(event)
+    LOGS.info(edited_message_real_dict)
+
+    LOGS.info(
+        f"{len(edited_message_real_dict)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
+
+    for count,message in enumerate(edited_message_real_dict):
+        deleted_id=message.get('id')
         deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
         if deleted_message_from_start_chat is not None:
-            LOGS.info(f"Message #{idx+1} that got deleted {deleted_message_from_start_chat.get('message')}")
+            LOGS.info(f"Message #{count + 1} that got deleted {deleted_message_from_start_chat.get('text')}")
             if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
-                await bot.delete_messages(entity=Config.CHANNEL_NAME_BOT, message_ids=[the_Dict.get('id')], revoke=True)
+                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[the_Dict.get('id')], revoke=True)
                 await collezione_fw.delete_one(the_Dict)
                 await collezione_get.delete_one({'id': deleted_id})
         else:
@@ -240,11 +235,6 @@ async def handler(event: telethon.events.messagedeleted.MessageDeleted.Event):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
 
-async def retrieve_chat_name(bot: TelegramClient, channel_id: int) -> str:
-
-    async for dialog in bot.iter_dialogs():
-        if str(dialog.id) == str(f"-100{channel_id}"):
-            return dialog.name
 
 
     # cursor = collection.find({})

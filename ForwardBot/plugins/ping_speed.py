@@ -1,7 +1,4 @@
-
-
-import telethon
-
+import pyrogram
 from speedtest import Speedtest
 
 
@@ -10,10 +7,10 @@ from ForwardBot.events import register
 from ForwardBot.utils import humanbytes
 
 
-@register(incoming=True, pattern=r"^\.speedtest$")
-async def speedtest(event:  telethon.events.newmessage.NewMessage):
+@register(incoming=True, pattern=r"^\.speedtest$", group=12)
+async def speedtest(event:  pyrogram.types.Message):
 
-    await bot.send_message(message="`Running speed test...`", entity=event.chat_id)
+    await bot.send_message(text="`Running speed test...`", chat_id=event.chat.id)
     try:
         test = Speedtest()
         test.get_best_server()
@@ -35,12 +32,10 @@ async def speedtest(event:  telethon.events.newmessage.NewMessage):
             f"**Upload :** `{humanbytes(result['upload'])}/s`\n"
             f"**Download :** `{humanbytes(result['download'])}/s`"
         )
-        LOGS.info(f"{result}")
 
-
-        await bot.send_message(entity=event.chat_id, message=msg)
+        await bot.send_message(chat_id=event.chat.id, text=msg)
     except Exception as e:
-        await bot.send_message(entity=event.chat_id, message=f"Error: occurred {e}")
+        await bot.send_message(chat_id=event.chat.id, text=f"Error: occurred {e}")
 
 CMD_HELP.update({
     "speedtest":

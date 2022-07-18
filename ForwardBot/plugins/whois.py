@@ -1,132 +1,104 @@
 import os
-from telethon.tl.functions.photos import GetUserPhotosRequest
-from telethon.tl.functions.users import GetFullUserRequest
-from telethon.tl.types import MessageEntityMentionName
-from ForwardBot import CMD_HELP, TEMP_DOWNLOAD_DIRECTORY, bot
+
+import pyrogram
+
+from pyrogram import enums
+
+import ForwardBot
+from ForwardBot import CMD_HELP,  bot
 from ForwardBot.events import register
+from ForwardBot.plugins.misc import extract_user, edit, download_media_wc
+from ForwardBot.plugins.replier import reply_img
 
 
-@register(pattern=".whois(?: |$)(.*)", incoming=True)
-async def who(event):
+@register(incoming=True, pattern='^.whois')
+async def who_is( message : pyrogram.types.Message):
+    find_user = await extract_user(message)
+    reply = message.reply_to_message
 
-    new_msg=await bot.send_message(message=
-        "`Get request to the TG Servers started...`", entity=event.chat_id)
-
-    if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
-        os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
-
-    replied_user = await get_user(event)
-
-    try:
-        photo, caption = await fetch_info(replied_user, event)
-    except AttributeError:
-        return new_msg.edit("`Couldn't get any info about this user`")
-
-    message_id_to_reply = event.message.reply_to_msg_id
-
-    if not message_id_to_reply:
-        message_id_to_reply = None
-
-    try:
-        resp=await bot.send_file(event.chat_id,
-                                     photo,
-                                     caption=caption,
-                                     link_preview=False,
-                                     force_document=False,
-                                     reply_to=message_id_to_reply,
-                                     parse_mode="html")
-
-        if not photo.startswith("http"):
-            os.remove(photo)
-        await event.delete()
-
-    except TypeError:
-        await resp.edit(caption, parse_mode="html")
+    if len(find_user) < 1:
+        return  await bot.send_message(reply_to_message_id=message.id,text= f'`"banFailUser"`', chat_id=message.chat.id)
 
 
-async def get_user(event):
-    if event.reply_to_msg_id and not event.pattern_match.group(1):
-        previous_message = await event.get_reply_message()
-        replied_user = await event.client(
-            GetFullUserRequest(previous_message.from_id))
-    else:
-        user = event.pattern_match.group(1)
 
-        if user.isnumeric():
-            user = int(user)
-
-        if not user:
-            self_user = await event.client.get_me()
-            user = self_user.id
-
-        if event.message.entities is not None:
-            probable_user_mention_entity = event.message.entities[0]
-
-            if isinstance(probable_user_mention_entity,
-                          MessageEntityMentionName):
-                user_id = probable_user_mention_entity.user_id
-                replied_user = await event.client(GetFullUserRequest(user_id))
-                return replied_user
+    for reply_user in find_user:
         try:
-            user_object = await event.client.get_entity(user)
-            replied_user = await event.client(
-                GetFullUserRequest(user_object.id))
-        except (TypeError, ValueError) as err:
-            return await event.edit(str(err))
 
-    return replied_user
+            reply_chat = await bot.get_chat( reply_user.id)
+            ForwardBot.LOGS.info("test2")
+        except Exception:
+            return await  bot.send_message(reply_to_message_id=message.id,text='`"whoisError"`', chat_id=message.chat.id)
+        if reply_user or reply_chat is not None:
+            try:
 
+                user_photo = reply_user.photo.big_file_id
+                photo = await download_media_wc(user_photo, 'photo.png')
+            except BaseException:
+                ForwardBot.LOGS.info("test3")
+                photo = None
+                pass
+            ForwardBot.LOGS.info("Out of the try except")
+            first_name = reply_user.first_name or 'notSet'
+            last_name = reply_user.last_name or 'notSet'
+            username = (
+                f'@{reply_user.username}'
+                if reply_user.username
+                else 'notSet'
+            )
+            user_id = reply_user.id
+            photos = await bot.get_chat_photos_count(user_id)
+            dc_id = reply_user.dc_id or 'notSet'
+            premium = reply_user.is_premium
+            bio = reply_chat.bio or 'notSet'
+            status = reply_user.status
+            isbot = reply_user.is_bot
+            last_seen = LastSeen(isbot, status)
+            sudo = SudoCheck(user_id)
+            chats = len(await bot.get_common_chats(user_id))
 
-async def fetch_info(replied_user, event):
-    replied_user_profile_photos = await event.client(
-        GetUserPhotosRequest(user_id=replied_user.user.id,
-                             offset=42,
-                             max_id=0,
-                             limit=80))
-    replied_user_profile_photos_count = "No profile picture"
-    try:
-        replied_user_profile_photos_count = replied_user_profile_photos.count
-    except AttributeError:
-        pass
-    user_id = replied_user.user.id
-    first_name = replied_user.user.first_name
-    last_name = replied_user.user.last_name
-    common_chat = replied_user.common_chats_count
-    username = replied_user.user.username
-    user_bio = replied_user.about
-    is_bot = replied_user.user.bot
-    restricted = replied_user.user.restricted
-    verified = replied_user.user.verified
-    photo = await event.client.download_profile_photo(user_id,
-                                                      TEMP_DOWNLOAD_DIRECTORY +
-                                                      str(user_id) + ".jpg",
-                                                      download_big=True)
-    first_name = first_name.replace(
-        "\u2060", "") if first_name else ("No firstName")
-    last_name = last_name.replace(
-        "\u2060", "") if last_name else ("No lastName")
-    username = "@{}".format(username) if username else (
-        "He hasn't got an username")
-    user_bio = user_bio if user_bio else ("No bio available")
+            caption = 'WhoisResult'+'\n'+'First Name: `'+first_name+'`'+'\n'+'LastName: `'\
+                      +last_name+'`'+'\n'+'Username` '\
+                      +username+'`'+'\n'+'User ID: `'\
+                      +str(user_id)+'`'\
+                      +'\n'+'N° photos: `'  +str(photos)+'`'+'\n'\
+                      +'`Assigned Data Center' +str(dc_id)+'`'+'\n'\
+                      +'Is premium: `' +str(premium)+'`'+'\n'\
+                      +'BIO desc: `'+str(bio)+'`'+'\n'\
+                      +'Status: `'+str(status)+'`'+'\n'\
+                      +'Last seen: `'+str(last_seen)+'`'+'\n'+\
+                      'Sudo status: `'+str(sudo)+'`'+'\n'+\
+                      'Chats we got in common: `'+str(chats)+'`'
 
-    caption = f"<b>Info about user - {username} -</b>\n\n"
-    caption += f"First name: {first_name}\n"
-    caption += f"Last name: {last_name}\n"
-    caption += f"Username: {username}\n"
-    caption += f"Number of profile pics: {replied_user_profile_photos_count}\n"
-    caption += f"Is Bot: {is_bot}\n"
-    caption += f"Is he restricted: {restricted}\n"
-    caption += f"Is he verified: {verified}\n"
-    caption += f"ID: <code>{user_id}</code>\n\n"
-    caption += f"Biography: \n<code>{user_bio}</code>\n\n"
-    caption += f"Number of chats we have in common: {common_chat}\n"
-    caption += f"Permanent link to the profile: <a href=\"tg://user?id={user_id}\">{first_name}</a>"
+    if photo:
 
-    return photo, caption
+        await reply_img(reply or message,
+                  photo, caption=caption, delete_file=True)
 
+    else:
 
+        return await bot.send_message(reply_to_message_id=message.id,text= caption, chat_id=message.chat.id)
+
+def LastSeen(bot, status):
+    if bot:
+        return 'BOT'
+    elif status == enums.UserStatus.ONLINE:
+        return 'statusOnline'
+    elif status == enums.UserStatus.OFFLINE:
+        return 'statusOffline'
+    elif status == enums.UserStatus.RECENTLY:
+        return 'statusRecently'
+    elif status == enums.UserStatus.LAST_WEEK:
+        return 'statusWeek'
+    elif status == enums.UserStatus.LAST_MONTH:
+        return 'statusMonth'
+    elif status == enums.UserStatus.LONG_AGO:
+        return 'statusLong'
+
+def SudoCheck(user_id):
+    if user_id in ForwardBot.Config.SUDO_USERS_INT:
+        return 'sudoCheck'
 CMD_HELP.update({
     "whois":
     ">`.whois <username>`"
-    "\nInfo: Gets the userinfo"
+    "\nInfo: Gets the  information of the specified user."
 })

@@ -1,4 +1,7 @@
 import asyncio
+import re
+
+import pyrogram
 
 from ForwardBot import CMD_HELP, bot, Config
 from ForwardBot.events import register
@@ -11,13 +14,14 @@ modules = CMD_HELP
 
 DEFAULTUSER = str(Config.ALIVE_NAME) if Config.ALIVE_NAME else uname().node
 
-
-@register(incoming=True, pattern="^.help(?: |$)(.*)")
-async def help(event):
-    args = event.pattern_match.group(1).lower()
+help_regex=r"^\.help(?: |$)(.*)"
+@register(incoming=True, pattern=help_regex, group=-10)
+async def help(event: pyrogram.types.Message):
+    m=re.search(help_regex,event.text)
+    args = m.group(1).lower()
     if args:
         if args in CMD_HELP:
-            await bot.send_message(message=str(CMD_HELP[args]), entity=event.chat_id)
+            await bot.send_message(text=str(CMD_HELP[args]), chat_id=event.chat.id)
         else:
             await asyncio.sleep(200)
             await event.delete()
@@ -28,11 +32,12 @@ async def help(event):
             string += "`" + str(i)
             string += "`\t|  "
 
-        msg_icon=await bot.send_message(message="⚡", entity=event.chat_id)
+        message_sent=await bot.send_message(text="⚡", chat_id=event.chat.id)
+
         await asyncio.sleep(3)
-        await bot.edit_message(message=msg_icon,text="**Forward Bot**\n\n"
+        await bot.edit_message_text(message_id=message_sent.id,text="**Forward Bot**\n\n"
                          f"**Hosted on {DEFAULTUSER} Operating sys: {Config.HOSTING_OP_SYSTEM}**\n**Loaded modules: {len(modules)}**\n\n"
-                         "• **Main menu :**\n"                                                                                                                                                                                                                                                                                       
-                         f"╰►| {string} ⋖╯\n\n", entity=event.chat_id)
+                         "• **Main menu :**\n"
+                         f"╰►| {string} ⋖╯\n\n", chat_id=event.chat.id)
         await asyncio.sleep(1000)
         await event.delete()

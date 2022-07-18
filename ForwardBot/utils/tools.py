@@ -1,20 +1,3 @@
-# Copyright (C) 2020 Adek Maulana
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 import re
 import hashlib
 import asyncio
@@ -25,8 +8,6 @@ import os.path
 from typing import Optional, Tuple
 from ForwardBot import bot, LOGS
 
-from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.tl.types import ChannelParticipantAdmin, ChannelParticipantCreator, DocumentAttributeFilename
 
 
 async def md5(fname: str) -> str:
@@ -77,19 +58,7 @@ def human_to_bytes(size: str) -> int:
     return int(float(number) * units[unit])
 
 
-async def is_admin(chat_id, user_id):
-    req_jo = await bot(GetParticipantRequest(
-        channel=chat_id,
-        user_id=user_id
-    ))
-    chat_participant = req_jo.participant
-    if isinstance(
-            chat_participant,
-            ChannelParticipantCreator) or isinstance(
-            chat_participant,
-            ChannelParticipantAdmin):
-        return True
-    return False
+
 
 
 async def runcmd(cmd: str) -> Tuple[str, str, int, int]:
@@ -119,31 +88,3 @@ async def take_screen_shot(video_file: str, duration: int, path: str = '') -> Op
         LOGS.error(err)
     return thumb_image_path if os.path.exists(thumb_image_path) else None
 
-
-async def check_media(reply_message):
-    if reply_message and reply_message.media:
-        if reply_message.photo:
-            data = reply_message.photo
-        elif reply_message.document:
-            if (
-                DocumentAttributeFilename(file_name="AnimatedSticker.tgs")
-                in reply_message.media.document.attributes
-            ):
-                return False
-            if (
-                reply_message.gif
-                or reply_message.video
-                or reply_message.audio
-                or reply_message.voice
-            ):
-                return False
-            data = reply_message.media.document
-        else:
-            return False
-    else:
-        return False
-
-    if not data or data is None:
-        return False
-    else:
-        return data

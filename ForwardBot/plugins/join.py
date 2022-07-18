@@ -1,3 +1,4 @@
+import re
 from datetime import datetime as dt
 
 from pytz import country_names as c_n
@@ -7,7 +8,8 @@ from pytz import timezone as tz
 from ForwardBot import CMD_HELP, COUNTRY, TZ_NUMBER, bot
 from ForwardBot.events import register
 
-
+time_regex=r"^.time(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?"
+date_regex=r"^.date(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?"
 async def get_tz(con):
     """ Get time zone of the given country. """
     if "(Uk)" in con:
@@ -33,15 +35,16 @@ async def get_tz(con):
         return
 
 
-@register(outgoing=True, pattern="^.time(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?")
+@register(incoming=True, pattern=time_regex)
 async def time_func(tdata):
     """ For .time command, return the time of
         1. The country passed as an argument,
         2. The default userbot country,
         3. The server where the userbot runs.
     """
-    con = tdata.pattern_match.group(1).title()
-    tz_num = tdata.pattern_match.group(2)
+    m=re.search(time_regex,tdata.text)
+    con = m.group(1).title()
+    tz_num = m.group(2)
 
     t_form = "%H:%M"
     c_name = None
@@ -57,11 +60,11 @@ async def time_func(tdata):
         tz_num = TZ_NUMBER
         timezones = await get_tz(COUNTRY)
     else:
-        await bot.send_message(message=f"`It's`  **{dt.now().strftime(t_form)}**  `here.`", entity=tdata.chat_id)
+        await bot.send_message(text=f"`It's`  **{dt.now().strftime(t_form)}**  `here.`", chat_id=tdata.chat.id)
         return
 
     if not timezones:
-        await bot.send_message(message="`Invaild country.`", entity=tdata.chat_id)
+        await bot.send_message(text="`Invaild country.`", chat_id=tdata.chat.id)
         return
 
     if len(timezones) == 1:
@@ -80,31 +83,33 @@ async def time_func(tdata):
             return_str += "in the command.`\n"
             return_str += f"`Example: .time {c_name} 2`"
 
-            await bot.send_message(message=return_str, entity=tdata.chat_id)
+            await bot.send_message(text=return_str, chat_id=tdata.chat.id)
             return
 
     dtnow = dt.now(tz(time_zone)).strftime(t_form)
 
     if c_name != COUNTRY:
-        await bot.send_message(message=
-            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`", entity=tdata.chat_id)
+        await bot.send_message(text=
+            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`", chat_id=tdata.chat.id)
         return
 
     elif COUNTRY:
-        await bot.send_message(message=f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
-                         f"({time_zone} timezone).`", entity=tdata.chat_id)
+        await bot.send_message(text=f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
+                         f"({time_zone} timezone).`", chat_id=tdata.chat.id)
         return
 
 
-@register(outgoing=True, pattern="^.date(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?")
+@register(incoming=True, pattern=date_regex)
 async def date_func(dat):
     """ For .date command, return the date of
         1. The country passed as an argument,
         2. The default userbot country(set it by using .settime),
         3. The server where the userbot runs.
     """
-    con = dat.pattern_match.group(1).title()
-    tz_num = dat.pattern_match.group(2)
+    m=re.search(date_regex,dat.text)
+
+    con = m.group(1).title()
+    tz_num = m.group(2)
 
     d_form = "%d/%m/%y - %A"
     c_name = ''
@@ -120,7 +125,7 @@ async def date_func(dat):
         tz_num = TZ_NUMBER
         timezones = await get_tz(COUNTRY)
     else:
-        await bot.send_message(message=f"`It's`  **{dt.now().strftime(d_form)}**  `here.`", entity=dat.chat_id)
+        await bot.send_message(text=f"`It's`  **{dt.now().strftime(d_form)}**  `here.`", chat_id=dat.chat.id)
         return
 
     if not timezones:
@@ -143,19 +148,19 @@ async def date_func(dat):
             return_str += "in the command.`\n"
             return_str += f"Example: .date {c_name} 2"
 
-            await bot.send_message(message=return_str, entity=dat.chat_id)
+            await bot.send_message(text=return_str, chat_id=dat.chat.id)
             return
 
     dtnow = dt.now(tz(time_zone)).strftime(d_form)
 
     if c_name != COUNTRY:
         await bot.send_message(
-            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`", entity=dat.chat_id)
+            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`", chat_id=dat.chat.id)
         return
 
     elif COUNTRY:
-        await bot.send_message(message=f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
-                       f"({time_zone} timezone).`", entity=dat.chat_id)
+        await bot.send_message(text=f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
+                       f"({time_zone} timezone).`", chat_id=dat.chat.id)
         return
 
 

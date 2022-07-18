@@ -1,8 +1,12 @@
 import asyncio
+import collections
+import enum
 import inspect
+import json
 import os
 
 import sys
+from datetime import datetime
 
 from math import ceil
 
@@ -45,9 +49,6 @@ else:
 COUNTRY = str(os.environ.get("COUNTRY", "ID"))
 TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 
-TEMP_DOWNLOAD_DIRECTORY = os.environ.get("TMP_DOWNLOAD_DIRECTORY",
-                                         "./downloads")
-ZIP_DOWNLOAD_DIRECTORY = os.environ.get("ZIP_DOWNLOAD_DIRECTORY", "./zips")
 
 if Config.SUDO_USERS_INT is None:
     LOGS.info("SUDO_USERS is None. Exiting...")
@@ -64,6 +65,32 @@ async def set_chat_id(bot: TelegramClient, channel_name: str) -> int:
     LOGS.warning(f"{Config.CHANNEL_NAME_CLIENT} chat not found.")
     sys.exit()
 
+def unwrap_dict(obj, classkey=None):
+    if isinstance(obj, pyrogram.types.messages_and_media.message.Str):
+        return obj
+    if isinstance(obj, dict):
+        data = {}
+        for (k, v) in obj.items():
+            data[k] = unwrap_dict(v, classkey)
+        return data
+    elif hasattr(obj, "_ast"):
+        return unwrap_dict(obj._ast())
+    elif hasattr(obj, "__iter__") and not isinstance(obj, str):
+        return [unwrap_dict(v, classkey) for v in obj]
+    elif hasattr(obj, "__dict__"):
+        data={}
+        for key, value in obj.__dict__.items():
+            if not key.startswith("_") and not callable(value):
+                data[key] = unwrap_dict(value, classkey)
+
+
+        if classkey is not None and hasattr(obj, "__class__"):
+            data[classkey] = obj.__class__.__name__
+        return data
+    elif isinstance(obj, datetime):
+        return obj.strftime("%Y-%m-%d %H:%M:%S%z")
+    else:
+        return obj
 
 with bot:
     try:
@@ -86,7 +113,6 @@ with bot:
         LOGS.info(e)
         quit(1)
 
-COUNT_MSG = 0
 CMD_HELP = {}
 
 client = motor.motor_asyncio.AsyncIOMotorClient(BotConfig.Config.CONNECTION_STRING)
@@ -115,24 +141,13 @@ LOGS.info(f"Db name {db.name}, collection names {bot.loop.run_until_complete(db.
 async def get_all_messages_to_db():
     message_dict = {}
     async for message in bot.get_chat_history(chat_id=Config.CLIENT_CHANNEL_ID):
-        LOGS.info(message)
-
         if isinstance(message, pyrogram.types.Message):
-            for key__, value__ in message.__dict__.items():
-
-                LOGS.info(f"Value type: {type(value__)} Value: {value__}, Key type: {type(key__)}, Key val {key__}")
-
-                # if isinstance(value__, pyrogram.types.object.Object) or isinstance(value__, pyrogram.methods.advanced.Advanced) :
-                    message_dict.update(dict((key, value) for key, value in value__.__dict__.items() if
-                                                         not callable(value__) and not key.startswith('__')))
-                else:
-
-                    message_dict.update({key__: value__})
-
+            LOGS.info(message)
+            LOGS.info(type(message))
+            message_dict = unwrap_dict(message)
         LOGS.info(message_dict)
-        break
-    LOGS.info(inspect.getmro(pyrogram.client.Client))
-    await collezione_get.update_one(filter={"id": message_dict.get('id')},update={'$setOnInsert': message_dict},upsert=True)
+        await collezione_get.update_one(filter={"id": message_dict.get('id')}, update={'$setOnInsert': message_dict},
+                                        upsert=True)
 
 
 with bot:

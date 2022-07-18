@@ -1,4 +1,0 @@
-2022-07-10 20:00:44,921 | INFO | telegram | test_group_input chat found. 
-2022-07-10 20:00:46,306 | WARNING | telegram | test_group_input chat not found. 
-2022-07-10 20:00:46,307 | INFO | telegram | CHANNEL_NAME_BOT environment variable isn't a valid entity. Check your environment file. 
-2022-07-10 20:00:46,307 | INFO | telegram |  
