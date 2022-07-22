@@ -38,10 +38,14 @@ def register(**args):
     def msg_decorator(func):
         async def wrap(client, message):
             try:
-                if str(message.from_user.id) not in Config.SUDO_USERS_INT:
-                    LOGS.info(f"{str(message.from_user.id)} tried to send a command, but he's not a sudo user")
-                    await bot.send_message(chat_id=message.chat.id, text="You are not allowed to use this command.")
-                    return
+                if not message.chat.type in [
+                    enums.ChatType.CHANNEL,
+
+                ]:
+                    if str(message.from_user.id) not in Config.SUDO_USERS_INT:
+                        LOGS.info(f"{str(message.from_user.id)} tried to send a command, but he's not a sudo user")
+                        await bot.send_message(chat_id=message.chat.id, text="You are not allowed to use this command.")
+                        return
                 if message.service and not service:
                     return
                 if message.service and isinstance(message.action, MessageActionContactSignUp):
@@ -88,7 +92,7 @@ def register(**args):
                 ftext += "\n\nTraceback info:\n"
                 ftext += str(format_exc())
                 ftext += "\n\nError text:\n"
-                ftext += str(sys.exc_info()[1])
+                ftext += str(e)
                 ftext += "\n\n--------END USERBOT TRACEBACK LOG--------"
 
                 LOGS.error(ftext)

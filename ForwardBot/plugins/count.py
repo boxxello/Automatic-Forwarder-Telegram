@@ -1,4 +1,5 @@
 import pyrogram
+from pyrogram.enums import ChatAction
 
 from ForwardBot import bot, collezione_fw, CMD_HELP, collezione_get, LOGS, Config
 from ForwardBot.events import register
@@ -7,6 +8,7 @@ from ForwardBot.events import register
 
 @register(incoming=True, pattern=r"^\.count(?: |$)(.*)")
 async def handler(event:  pyrogram.types.Message):
+    await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     LOGS.info("---Trying to count the symbols---")
     count = 0
     cursor = collezione_fw.find({})

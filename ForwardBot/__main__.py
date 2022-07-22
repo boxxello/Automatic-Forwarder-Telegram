@@ -1,4 +1,5 @@
 import asyncio
+import sqlite3
 from importlib import import_module
 
 from pyrogram import idle
@@ -15,19 +16,23 @@ for module_name in MODS:
 for module_name in ALL_MODULES:
     imported_module = import_module("ForwardBot.plugins." + module_name)
 
-while True:
-    try:
-        LOGS.info("Attempting to run bot")
-        bot.run()
 
+#start the bot and make it idle to wait for messages
+async def start_bot():
+    try:
+        await bot.start()
+        await idle()
     except BaseException as ex:
         LOGS.error(f"ERROR: {INVALID_PH}\n\n {ex}")
         exit(-3)
     except OSError as e:
         LOGS.error(f"An error happened while running the bot {e}")
+    except sqlite3.ProgrammingError as e2:
+        LOGS.error(f"Database error while running the bot {e2}")
+        quit(-5012)
 
 
 
-
-
-
+LOGS.info("Attempting to run bot")
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_bot())

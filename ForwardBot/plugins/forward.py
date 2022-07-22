@@ -12,12 +12,8 @@ from ForwardBot.events import register, message_deleted
 
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
-    LOGS.info(f"NEW MESSAGE CAUGHT {event}")
-    new_dictionary = {}
-    if isinstance(event, pyrogram.types.Message):
-        new_dictionary = unwrap_dict(event)
-    LOGS.info(new_dictionary)
-    LOGS.info(f"MESSAGE ACQUIRED {new_dictionary}")
+    new_dictionary = unwrap_dict(event)
+    LOGS.info(f"MESSAGE ACQUIRED {new_dictionary.text}")
     if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
         await collezione_get.insert_one(new_dictionary)
         #check if is reply
@@ -175,19 +171,19 @@ def check_for_pattern_match(event_text: str) -> tuple:
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
-    LOGS.info(event)
+    # LOGS.info(event)
     try:
 
         edited_message_real_dict = unwrap_dict(event)
 
-        LOGS.info(f"PRINTING EDITED MESSAGE {edited_message_real_dict}")
+        LOGS.info(f"PRINTING EDITED MESSAGE {edited_message_real_dict.get('text')}")
         if (return_tuple_match := check_for_pattern_match(edited_message_real_dict.get('text'))) != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
             if (the_Dict := await collezione_fw.find_one(
                     {Config.SUFFIX_KEY_ID_DBMS: edited_message_real_dict.get('id')})) is not None:
 
-                LOGS.info(f"Printing retrieved {the_Dict}")
+                LOGS.info(f"Printing retrieved {the_Dict.get('text')}")
                 LOGS.info(f"Printing retrieved message id: {the_Dict.get(Config.SUFFIX_KEY_ID_DBMS)}")
 
                 LOGS.info(f"EDITING MSG FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
@@ -211,11 +207,9 @@ async def handler(event: pyrogram.types.Message):
 @message_deleted(chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
-    LOGS.info(event)
-
-
+    # LOGS.info(event)
     edited_message_real_dict = unwrap_dict(event)
-    LOGS.info(edited_message_real_dict)
+    LOGS.info(edited_message_real_dict.get('text'))
 
     LOGS.info(
         f"{len(edited_message_real_dict)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")

@@ -3,6 +3,7 @@ import os
 import pyrogram
 
 from pyrogram import enums
+from pyrogram.enums import ChatAction
 
 import ForwardBot
 from ForwardBot import CMD_HELP,  bot
@@ -13,6 +14,7 @@ from ForwardBot.plugins.replier import reply_img
 
 @register(incoming=True, pattern='^.whois')
 async def who_is( message : pyrogram.types.Message):
+    await bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
     find_user = await extract_user(message)
     reply = message.reply_to_message
 

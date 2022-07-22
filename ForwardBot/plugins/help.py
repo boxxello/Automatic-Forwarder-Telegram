@@ -2,6 +2,7 @@ import asyncio
 import re
 
 import pyrogram
+from pyrogram.enums import ChatAction
 
 from ForwardBot import CMD_HELP, bot, Config
 from ForwardBot.events import register
@@ -17,6 +18,7 @@ DEFAULTUSER = str(Config.ALIVE_NAME) if Config.ALIVE_NAME else uname().node
 help_regex=r"^\.help(?: |$)(.*)"
 @register(incoming=True, pattern=help_regex, group=-10)
 async def help(event: pyrogram.types.Message):
+    await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     m=re.search(help_regex,event.text)
     args = m.group(1).lower()
     if args:

@@ -8,23 +8,34 @@ from typing import Union
 
 from ForwardBot.const_dirs import const_dirs_class
 
-
-class _UTCFormatter(logging.Formatter):
-    converter = time.gmtime
+import logging
 
 
-_loglevel_map = {
-    logging.DEBUG   : 'DEBUG',
-    logging.INFO    : 'INFO',
-    logging.WARNING : 'WARNING',
-    logging.ERROR   : 'ERROR',
-    logging.CRITICAL: 'CRITICAL',
-}
+
 class LastPartFilter(logging.Filter):
     def filter(self, record):
         record.name_last = record.name.rsplit('.', 1)[-1]
         return True
 
+def get_logger_no_file_h(name: str,
+                level=logging.INFO
+               ) -> logging.Logger:
+
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s | %(levelname)s | %(name_last)s | %(message)s ')
+
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    stdout_handler.setLevel(level)
+    stdout_handler.setFormatter(formatter)
+
+    stdout_handler.addFilter(LastPartFilter())
+    logger.addHandler(stdout_handler)
+
+    logger.propagate=False
+
+
+    return logger
 
 def get_logger(name_file: Union[Path, str], name: str, level=logging.INFO
                ) -> logging.Logger:
@@ -45,6 +56,7 @@ def get_logger(name_file: Union[Path, str], name: str, level=logging.INFO
     stdout_handler.addFilter(LastPartFilter())
     logger.addHandler(file_handler)
     logger.addHandler(stdout_handler)
+    logger.propagate = False
     return logger
 
 def get_logger_no_sysout(name_file: Union[Path, str], name: str,
@@ -63,5 +75,9 @@ def get_logger_no_sysout(name_file: Union[Path, str], name: str,
     file_handler.addFilter(LastPartFilter())
 
     logger.addHandler(file_handler)
+    logger.propagate = False
     return logger
+
+
+
 

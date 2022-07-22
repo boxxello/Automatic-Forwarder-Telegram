@@ -5,6 +5,7 @@ import platform
 from datetime import datetime
 
 import pyrogram
+from pyrogram.enums import ChatAction
 
 from ForwardBot import CMD_HELP, bot
 from ForwardBot.events import register
@@ -14,6 +15,7 @@ modules = CMD_HELP
 
 @register(incoming=True, pattern=r"^\.systeminfo")
 async def psu(event: pyrogram.types.Message):
+    await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     uname = platform.uname()
     softw = "**SYSTEM RELATED INFO**\n"
     softw += f"`OS         : {uname.system}`\n"

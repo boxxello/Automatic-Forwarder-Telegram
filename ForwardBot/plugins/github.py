@@ -2,6 +2,7 @@ import re
 
 import aiohttp
 import pyrogram.types
+from pyrogram.enums import ChatAction
 
 from ForwardBot.events import register
 from ForwardBot import CMD_HELP, bot
@@ -9,7 +10,7 @@ from ForwardBot import CMD_HELP, bot
 regex_exp = r"^\.github (.*)"
 @register(pattern=regex_exp, incoming=True)
 async def github(event : pyrogram.types.Message):
-
+    await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     match=re.search(regex_exp, event.text)
     URL = f"https://api.github.com/users/{match.group(1)}"
 

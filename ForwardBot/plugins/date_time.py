@@ -1,6 +1,7 @@
 import re
 from datetime import datetime as dt
 
+from pyrogram.enums import ChatAction
 from pytz import country_names as c_n
 from pytz import country_timezones as c_tz
 from pytz import timezone as tz
@@ -42,6 +43,7 @@ async def time_func(tdata):
         2. The default userbot country,
         3. The server where the userbot runs.
     """
+    await bot.send_chat_action(chat_id=tdata.chat.id, action=ChatAction.TYPING)
     m=re.search(time_regex,tdata.text)
     con = m.group(1).title()
     tz_num = m.group(2)
@@ -106,6 +108,7 @@ async def date_func(dat):
         2. The default userbot country(set it by using .settime),
         3. The server where the userbot runs.
     """
+    await bot.send_chat_action(chat_id=dat.chat.id, action=ChatAction.TYPING)
     m=re.search(date_regex,dat.text)
 
     con = m.group(1).title()

@@ -1,14 +1,17 @@
-import pyrogram
-from speedtest import Speedtest
+from datetime import datetime
 
+import pyrogram
+from pyrogram.enums import ChatAction
+from pyrogram.types import Message
+from speedtest import Speedtest
 
 from ForwardBot import LOGS, bot, CMD_HELP
 from ForwardBot.events import register
 from ForwardBot.utils import humanbytes
 
 
-@register(incoming=True, pattern=r"^\.speedtest$", group=12)
-async def speedtest(event:  pyrogram.types.Message):
+@register(incoming=True, pattern=r"^\.speedtest$")
+async def speedtest(event: pyrogram.types.Message):
 
     await bot.send_message(text="`Running speed test...`", chat_id=event.chat.id)
     try:
@@ -32,16 +35,26 @@ async def speedtest(event:  pyrogram.types.Message):
             f"**Upload :** `{humanbytes(result['upload'])}/s`\n"
             f"**Download :** `{humanbytes(result['download'])}/s`"
         )
-
+        await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
         await bot.send_message(chat_id=event.chat.id, text=msg)
     except Exception as e:
         await bot.send_message(chat_id=event.chat.id, text=f"Error: occurred {e}")
 
+
+@register(incoming=True, pattern=r"^\.ping")
+async def onping(m: Message):
+    before = datetime.now()
+    await bot.send_chat_action(chat_id=m.chat.id, action=ChatAction.TYPING)
+    after = datetime.now()
+    diff_ms = (after - before).microseconds / 1000
+
+    await m.reply(text=f"<b>Pong!</b> <code> {diff_ms} </code><code>ms</code>")
+
+
 CMD_HELP.update({
     "speedtest":
-    "⚡𝘾𝙈𝘿⚡: `.speedtest`"
-    "\n↳ : Gets info about the bot Internet speeds."
+        "⚡𝘾𝙈𝘿⚡: `.speedtest`"
+        "\n↳ : Gets info about the bot Internet speeds."
+        "\n\n⚡𝘾𝙈𝘿⚡: `.ping`"
+        "\n↳ : Gets the current ping of the bot."
 })
-
-
-

@@ -1,14 +1,9 @@
 import asyncio
-import collections
-import enum
-import inspect
-import json
+
 import os
 
 import sys
 from datetime import datetime
-
-from math import ceil
 
 import motor.motor_asyncio
 import pymongo
@@ -17,14 +12,16 @@ from pyrogram import Client as TelegramClient
 
 from pymongo.errors import ConnectionFailure
 
-from ForwardBot.logger import get_logger
+from ForwardBot.logger import get_logger_no_file_h
 from ForwardBot.BotConfig import Config
 from ForwardBot.const_dirs import const_dirs_class
 
-loop = asyncio.get_event_loop()
+
 const_values = const_dirs_class()
 const_values.make_dir()
-LOGS = get_logger("Telegram", "telegram")
+
+get_logger_no_file_h("")
+LOGS = get_logger_no_file_h("Telegram")
 
 CHANNEL_CLIENT_ID = None
 CHANNEL_NAME_CLIENT = os.environ.get("CHANNEL_NAME_CLIENT", "")
@@ -95,7 +92,7 @@ def unwrap_dict(obj, classkey=None):
 with bot:
     try:
         # LOGS.info(Config.CHANNEL_NAME_CLIENT)
-        Config.CLIENT_CHANNEL_ID = loop.run_until_complete(set_chat_id(bot, Config.CHANNEL_NAME_CLIENT))
+        Config.CLIENT_CHANNEL_ID = bot.loop.run_until_complete(set_chat_id(bot, Config.CHANNEL_NAME_CLIENT))
     except BaseException as e:
         LOGS.info(
             "CHANNEL_NAME_CLIENT environment variable isn't a "
@@ -105,10 +102,21 @@ with bot:
 with bot:
     try:
         # LOGS.info(Config.CHANNEL_NAME_BOT)
-        Config.BOT_CHANNEL_ID = loop.run_until_complete(set_chat_id(bot, Config.CHANNEL_NAME_BOT))
+        Config.BOT_CHANNEL_ID = bot.loop.run_until_complete(set_chat_id(bot, Config.CHANNEL_NAME_BOT))
     except BaseException as e:
         LOGS.info(
             "CHANNEL_NAME_BOT environment variable isn't a "
+            "valid entity. Check your environment file.")
+        LOGS.info(e)
+        quit(1)
+
+
+with bot:
+    try:
+        Config.PING_CHANNEL_ID = bot.loop.run_until_complete(set_chat_id(bot, Config.CHANNEL_NAME_PING))
+    except BaseException as e:
+        LOGS.info(
+            "PING_CHANNEL_ID environment variable isn't a "
             "valid entity. Check your environment file.")
         LOGS.info(e)
         quit(1)

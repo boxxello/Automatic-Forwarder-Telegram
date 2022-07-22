@@ -12,6 +12,7 @@ class Config(object):
     SEP = ";"
     CLIENT_CHANNEL_ID=None
     BOT_CHANNEL_ID=None
+    PING_CHANNEL_ID=None
     load_dotenv(const_dirs_class.USER_DATA_PATH, encoding="utf-8")
     API_ID = int(environ.get("TELEGRAM_API_ID", None))
     SUDO_USERS_INT = environ["SUDO_USERS"].split(SEP)
@@ -19,7 +20,9 @@ class Config(object):
     BOT_PREFIX=environ.get("BOT_PREFIX", None)
     CHANNEL_NAME_BOT = environ.get("CHANNEL_NAME_BOT", None)
     CHANNEL_NAME_CLIENT = environ.get("CHANNEL_NAME_CLIENT", None)
+    CHANNEL_NAME_PING=environ.get("CHANNEL_NAME_PING", None)
     SESSION_NAME_CLIENT = environ.get("SESSION_NAME_CLIENT", None)
+
     SUFFIX_KEY_ID_DBMS = environ.get("SUFFIX_KEY_ID_DBMS", "id_msg_fw_bef")
     CELLPHONE_NUMBER=environ.get("CELLPHONE_NUMBER", None)
     COMMAND_HAND_LER = environ.get("COMMAND_HAND_LER", "^/")
