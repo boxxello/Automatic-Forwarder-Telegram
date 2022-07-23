@@ -9,7 +9,7 @@ from ForwardBot.utils_no_bot.utils_no import retrieve_symbols, retrieve_pref_suf
 
 
 class Symb_Config(object):
-    FILE_SYMB_EXCLUDE = environ.get("FILE_EXCLUDE", None)
+    FILE_SYMB_EXCLUDE = environ.get("FILE_EXCLUDE", "assets_to_ignore.txt")
     path=os.path.join(const_dirs_class.CURR_DIR, FILE_SYMB_EXCLUDE)
     if os.path.exists(path):
         LOGS.info(f"FOUND FILE TO RETRIEVE SYMBOLS FROM {path}")
@@ -20,8 +20,8 @@ class Symb_Config(object):
     else:
         LOGS.error(f"Didn't find file {path}, check .env file")
         exit(-11)
-    FILE_SYMB_PREF_SUFFIX=environ.get("FILE_PREF_SUFFIX_MSG", None)
-    #create_dict_pref_suffix_msg(FILE_SYMB_PREF_SUFFIX)
+    FILE_SYMB_PREF_SUFFIX=environ.get("FILE_PREF_SUFFIX_MSG", "pref_suffix_msg.json")
+    #create_dict_pref_suffix_msg(os.path.join(const_dirs_class.CURR_DIR,FILE_SYMB_PREF_SUFFIX))
     DICTIONARY_VALS_PREF_SUFFIX=retrieve_pref_suffix_msg(os.path.join(const_dirs_class.CURR_DIR,FILE_SYMB_PREF_SUFFIX))
     LOGS.info(DICTIONARY_VALS_PREF_SUFFIX)
     extractor=reticker.TickerExtractor()

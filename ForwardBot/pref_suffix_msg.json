@@ -1,37 +1,46 @@
 {
-    "glossary": {
-        "PATTERN1": {
-            "prefix": "NUOVA IDEA DI TRADING \uD83D\uDCC8 \n\n",
-            "suffix": "\n\n⚠️ Questo messaggio non costituisce un consiglio di investimento ed è esclusivamente a scopo didattico ⚠️️\n"
-
-        },
-        "PATTERN2": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN3": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN4": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN5": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN6": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN7": {
-            "prefix": "",
-            "suffix": ""
-        },
-        "PATTERN8": {
-            "prefix": "",
-            "suffix": ""
-        }
+  "glossary": {
+    "PATTERN1": {
+      "prefix": "NUOVA IDEA DI TRADING \uD83D\uDCC8 \n\n",
+      "suffix": "\n\n⚠️ Questo messaggio non costituisce un consiglio di investimento ed è esclusivamente a scopo didattico ⚠️️\n"
+    },
+    "PATTERN2": {
+      "prefix": "",
+      "suffix": "",
+      "remove_string": {
+        "optional_info": [
+          "copier user"
+        ]
+      }
+    },
+    "PATTERN3": {
+      "prefix": "",
+      "suffix": ""
+    },
+    "PATTERN4": {
+      "prefix": "",
+      "suffix": ""
+    },
+    "PATTERN5": {
+      "prefix": "",
+      "suffix": ""
+    },
+    "PATTERN6": {
+      "prefix": "",
+      "suffix": ""
+    },
+    "PATTERN7": {
+      "prefix": "",
+      "suffix": ""
+    },
+    "PATTERN8": {
+      "prefix": "",
+      "suffix": "",
+      "remove_string": {
+        "optional_info": [
+          "copier user"
+        ]
+      }
     }
+  }
 }

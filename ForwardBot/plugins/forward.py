@@ -1,10 +1,5 @@
-import inspect
 import re
-
 import pyrogram
-from pyrogram import filters
-from pyrogram.filters import chat
-
 from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
@@ -13,30 +8,36 @@ from ForwardBot.events import register, message_deleted
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
     new_dictionary = unwrap_dict(event)
-    LOGS.info(f"MESSAGE ACQUIRED {new_dictionary.text}")
-    if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
-        await collezione_get.insert_one(new_dictionary)
-        #check if is reply
-        if new_dictionary.get('reply_to_message_id'):
-            LOGS.info(f"CAUGHT REPLY")
-            the_Dict = await collezione_get.find_one({'id': new_dictionary.get('reply_to_message_id')})
-            LOGS.info(f"Dict of the event that got a reply: {the_Dict}")
+    if event.text is not None:
+        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {event.text}")
 
-            other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
-            if other_dict is not None:
-                LOGS.info(f"DICT OLD  MESSAGE  {other_dict}")
-                LOGS.info(
-                    f"It is a reply to the message id: {other_dict.get('id')}, text in the message: {other_dict.get('text')}")
-                await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], True,
-                                                other_dict.get('id'))
-                return
-            else:
-                LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
-                return
+        if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
+            await collezione_get.insert_one(new_dictionary)
+            # check if is reply
+            if new_dictionary.get('reply_to_message_id'):
+                LOGS.info(f"CAUGHT REPLY")
+                the_Dict = await collezione_get.find_one({'id': new_dictionary.get('reply_to_message_id')})
+                LOGS.info(f"Dict of the event that got a reply: {the_Dict}")
 
-        await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], False, "")
+                other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
+                if other_dict is not None:
+                    LOGS.info(f"DICT OLD  MESSAGE  {other_dict}")
+                    LOGS.info(
+                        f"It is a reply to the message id: {other_dict.get('id')}, text in the message: {other_dict.get('text')}")
+                    await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], True,
+                                                    other_dict.get('id'))
+                    return
+                else:
+                    LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
+                    return
+
+            await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], False, "")
+        else:
+            LOGS.info("Command registered")
+        LOGS.info(f"-----MESSAGE ACQUIRED BLOCK FINISH------")
     else:
-        LOGS.info("Command registered")
+        LOGS.info(f"-----Message has got no text in it. DISCARDING ------")
+
 
 
 async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply: bool = None,
@@ -87,12 +88,13 @@ async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply:
         dict_event = unwrap_dict(msgsent_)
         dict_event.update({Config.SUFFIX_KEY_ID_DBMS: messageid})
         LOGS.info(f"MESSAGE SENT {dict_event}")
-        LOGS.info(f" {msgsent_}")
+        LOGS.info(f"Text in the message {msgsent_.text}")
         await collezione_fw.insert_one(dict_event)
-        # BotConfig.Config.queue_latest_messages.appendleft(dict_event)
+
 
     else:
         LOGS.info("NO MATCH")
+    LOGS.info("-----BLOCK send_msg_if_pattern_match FINISH------")
     #     if text_message:
     #         with open("match_found.txt", "ab") as f:
     #             f.write(f"START-----------\n"
@@ -149,23 +151,38 @@ def add_prefix_suffix(val_ret: int, text_message: str) -> str:
 def check_for_pattern_match(event_text: str) -> tuple:
     if re.search(Config.PATTERNURL, event_text, flags=re.IGNORECASE):
         event_text = re.sub(Config.PATTERNURL, "", event_text, flags=re.IGNORECASE)
-    elif re.match(Config.PATTERN1, event_text, flags=(re.IGNORECASE | re.UNICODE | re.MULTILINE)):
+    elif matches := (re.match(Config.PATTERN1, event_text, flags=(re.IGNORECASE | re.UNICODE | re.MULTILINE))):
         return 1, event_text
-    elif re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE):
-        return 2, event_text
-    elif re.match(Config.PATTERN3, event_text, flags=re.IGNORECASE):
+    elif matches := (re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE)):
+        return (2, ret_[1]) if (ret_ :=remove_optional_info(matches, "PATTERN2"))[0] else (2, event_text)
+    elif matches := (re.match(Config.PATTERN3, event_text, flags=re.IGNORECASE)):
         return 3, event_text
-    elif re.match(Config.PATTERN4, event_text, flags=re.IGNORECASE):
+    elif matches := (re.match(Config.PATTERN4, event_text, flags=re.IGNORECASE)):
         return 4, event_text
-    elif re.match(Config.PATTERN5, event_text, flags=(re.IGNORECASE | re.MULTILINE)):
+    elif matches := (re.match(Config.PATTERN5, event_text, flags=(re.IGNORECASE | re.MULTILINE))):
         return 5, event_text
-    elif re.match(Config.PATTERN6, event_text, flags=re.IGNORECASE | re.MULTILINE):
+    elif matches := (re.match(Config.PATTERN6, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 6, event_text
-    elif re.match(Config.PATTERN7, event_text, flags=re.IGNORECASE | re.MULTILINE):
-        return 7, event_text
-    elif re.match(Config.PATTERN8, event_text, flags=re.IGNORECASE | re.MULTILINE):
+    elif matches := (re.match(Config.PATTERN7, event_text, flags=re.IGNORECASE | re.MULTILINE)):
+        return (7, ret_[1]) if (ret_ :=remove_optional_info(matches, "PATTERN7"))[0] else (7, event_text)
+        # if (ret_ := baz("aaa", "bb"))[0]:
+        #     return 7, ret_[1]
+    elif matches := (re.match(Config.PATTERN8, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 8, event_text
     return -1, event_text
+
+
+def remove_optional_info(matches: re.Match, pattern) -> tuple:
+    if matches:
+        if matches.lastgroup == "optional_info":
+            if [x for x in
+                Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][pattern]["remove_string"]["optional_info"]
+                if x in matches.group('optional_info')]:
+                # replace the optional_info value with an empty string
+                opt_start, opt_end = matches.span('optional_info')
+                rest = matches.string[:opt_start] + matches.string[opt_end:]
+                return True, rest
+    return False, ""
 
 
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
@@ -189,7 +206,7 @@ async def handler(event: pyrogram.types.Message):
                 LOGS.info(f"EDITING MSG FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
                 # here i try to edit the message on the end channel by the end channel id
                 text_message = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
-                await bot.edit_message(text=text_message, entity=Config.CHANNEL_NAME_BOT, message=the_Dict.get('id'))
+                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID, message_id=the_Dict.get('id'))
 
 
 
@@ -203,19 +220,19 @@ async def handler(event: pyrogram.types.Message):
         LOGS.error(f"ERROR {e}")
         LOGS.info(f"----EXCEPTION THROWN, EDITED MESSAGE BLOCK FINISH----")
 
+
 ## @bot.on_deleted_messages(filters=filters.chat(Config.CLIENT_CHANNEL_ID))
 @message_deleted(chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
     # LOGS.info(event)
     edited_message_real_dict = unwrap_dict(event)
-    LOGS.info(edited_message_real_dict.get('text'))
 
     LOGS.info(
         f"{len(edited_message_real_dict)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
 
-    for count,message in enumerate(edited_message_real_dict):
-        deleted_id=message.get('id')
+    for count, message in enumerate(edited_message_real_dict):
+        deleted_id = message.get('id')
         deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
         if deleted_message_from_start_chat is not None:
             LOGS.info(f"Message #{count + 1} that got deleted {deleted_message_from_start_chat.get('text')}")
@@ -224,12 +241,9 @@ async def handler(event: pyrogram.types.Message):
                 await collezione_fw.delete_one(the_Dict)
                 await collezione_get.delete_one({'id': deleted_id})
         else:
-            LOGS.warning("UNEXPECTED ERROR IN DELETED MESSAGE FUNCT. DELETE MESSAGE IS NONE")
+            LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
 
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
-
-
-
 
     # cursor = collection.find({})
     # for document in cursor:

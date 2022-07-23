@@ -98,7 +98,7 @@ def register(**args):
                 LOGS.error(ftext)
         filter = None
         if pattern:
-            filter = filters.regex(pattern)
+            filter = filters.regex(pattern, flags=(re.IGNORECASE|re.MULTILINE))
 
             if outgoing and not incoming:
                 filter &= filters.me
@@ -118,7 +118,7 @@ def register(**args):
             bot.add_handler(EditedMessageHandler(wrap, filter))
         else:
             if pattern:
-                bot.add_handler(MessageHandler(wrap, filter), group=1)
+                bot.add_handler(MessageHandler(wrap, filter), group=15)
             else:
                 bot.add_handler(MessageHandler(wrap, filter))
 

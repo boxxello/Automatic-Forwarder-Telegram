@@ -8,16 +8,17 @@ from pyrogram.errors import FloodWait
 from ForwardBot import bot, LOGS
 from ForwardBot.plugins import ALL_MODULES
 from ForwardBot.utils_no_bot import MODS
+
 INVALID_PH = '\nERROR: The Phone No. entered is INVALID' \
              '\nTip: Use Country Code along with number ' \
              '\n or check your phone number and try again !'
 for module_name in MODS:
-    imported_module= import_module("ForwardBot.utils_no_bot." + module_name)
+    imported_module = import_module("ForwardBot.utils_no_bot." + module_name)
 for module_name in ALL_MODULES:
     imported_module = import_module("ForwardBot.plugins." + module_name)
 
 
-#start the bot and make it idle to wait for messages
+# start the bot and make it idle to wait for messages
 async def start_bot():
     try:
         await bot.start()
@@ -30,7 +31,6 @@ async def start_bot():
     except sqlite3.ProgrammingError as e2:
         LOGS.error(f"Database error while running the bot {e2}")
         quit(-5012)
-
 
 
 LOGS.info("Attempting to run bot")

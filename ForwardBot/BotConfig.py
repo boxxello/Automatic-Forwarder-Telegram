@@ -1,3 +1,4 @@
+import sys
 from collections import deque
 from os import environ
 import platform
@@ -25,10 +26,18 @@ class Config(object):
 
     SUFFIX_KEY_ID_DBMS = environ.get("SUFFIX_KEY_ID_DBMS", "id_msg_fw_bef")
     CELLPHONE_NUMBER=environ.get("CELLPHONE_NUMBER", None)
-    COMMAND_HAND_LER = environ.get("COMMAND_HAND_LER", "^/")
+
     ALIVE_NAME = environ.get(f"{platform.uname().node}", None)
     HOSTING_OP_SYSTEM = platform.uname().system
     CONNECTION_STRING=environ.get("CONNECTION_STRING", None)
+    if CONNECTION_STRING is None:
+        sys.exit("CONNECTION_STRING is None. Exiting...")
+    OUTPUT_LOGS_TO_FILE = environ.get("OUTPUT_LOGS_TO_FILE", None)
+    if OUTPUT_LOGS_TO_FILE == 'True':
+        OUTPUT_LOGS_TO_FILE = True
+    else:
+        OUTPUT_LOGS_TO_FILE = False
+
     # ([A-Za-z_][A-Za-z0-9_]{2,60}|(__.*__))
     # PATTERN1 = r"^\s*(?P<symbol>[A-Z]{3}[\/I\\\ |-]?[A-Z]{3}|(GOLD))\s*(?P<word2>BUY|SELL|SELL LIMIT|BUY LIMIT)+\s*(?:\s*@\s*)?(?P<amount>-?((\d+\.\d+)|(\d+\.\d+\+?)|(\d+)))\s*(?P<entry>\(?\d{1}[A-Z|a-z]{2}\s*Entry\)?)?\s*(?:\s*(?P<word4>SL|TP)\s*(?P<word5>-?\d+\.\d+|\d+\.\d+\+|(?:\()?Open(?:\))?)\s*(?P<word6>\((-?\d+|\d+\+)?\s*Pips\))?)*\s*(?P<type>Intra-Day Trade|SWING TRADE)?\s*(?:\()?(?P<optional_info>(?<=\().*(?=\)))?(?:\))?\s*$"
     # https://regex101.com/r/tWoqR5/2
@@ -39,8 +48,9 @@ class Config(object):
     # https://regex101.com/r/W4Sc3B/1 no emoji /backup
     # https://regex101.com/r/G3RBXI/1 con emoji dentro+opt value
     PATTERNURL = r"(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?"
-    PATTERN2 = r"^\s*(?P<symbol>([A-Z]{6}[\/\\\ |-]GOLD)|(([A-Z]{3}[\/I\\\ |-]?[(A-Z)|(0-9)]{3})|(GOLD)))?\s*(\(?(Intra-Day)?\s*\d*[A-Z|a-z]{2}\s*ENTRY\)?)?\s*(((?P<instance>RUNNING|CLOSED|CLOSE)((?:\s*)With)?\s*(?P<pips_num>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?))|\s*((?:\s*)With)?\s*(?P<pips_num2>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?)(\s*(?P<instance2>RUNNING|CLOSED|CLOSE)))\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?(?P<close>CLOSE)?\s*(?P<where>TO|AT|WITH)?\s*(?P<pips_num3>-\s*\d+|\d+\+|\d+|\+\d+)?\s*(?:(PIPS)?)(?P<optional_info>[\s\S]*)?$"
-    # https://regex101.com/r/LlVQum/1
+    PATTERN2 = r"^\s*(?P<symbol>([A-Z]{6}\s*[\/\\\|-]?\s*GOLD)|(([A-Z]{3}\s*[\/I\\\ |-]?\s*[(A-Z)|(0-9)]{3})|(GOLD)))?\s*(\(?(Intra-Day)?\s*\d*[A-Z|a-z]{2}\s*ENTRY\)?)?\s*(((?P<instance>RUNNING|CLOSED|CLOSE)((?:\s*)With)?\s*(?P<pips_num>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?))|\s*((?:\s*)With)?\s*(?P<pips_num2>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?)(\s*(?P<instance2>RUNNING|CLOSED|CLOSE)))\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?(?P<close>CLOSE)?\s*(?P<where>TO|AT|WITH)?\s*(?P<pips_num3>-\s*\d+|\d+\+|\d+|\+\d+)?\s*(?:(PIPS)?)(?P<optional_info>.*)?$"
+    #
+
     # https://regex101.com/r/SM2i0S/1 backup
 
     PATTERN3 = r"\s*((?P<symbol>([A-Z]{6}[\/\\\ |-]GOLD)|(([A-Z]{3}[\/I\\\ |-]?[(A-Z)|(0-9)]{3})|(GOLD)))\s*(?P<info>Trade\s*Recap\s*:?)?|(\s*(?P<info2>Trade\s*Recap\s*:?)?\s*(?P<symbol2>[A-Z]{3}[\/I\\\ |-]?[(A-Z)|(0-9)]{3}|(GOLD))))?\s*(?P<type>(SL|TP)?(\d{1})?)\s*(?P<type_act>Hit)\s*((-\d+|\d+\+|\d+|\+\d+)?\s*(&\s*(-\d+|\d+\+|\d+|\+\d+)+)?\s*((Pips)+)?)+\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?\s*$"
@@ -58,7 +68,7 @@ class Config(object):
     # https://regex101.com/r/75ke5e/2
     SYMB_PATTERN = r"^(?P<symbol>[A-Z]{3}[\/I\\\ |-]?[A-Z]{3}|(GOLD))$"
     # https://regex101.com/r/6jedk9/1
-    queue_latest_messages = deque(maxlen=5)
+
     HELP_MSG = """
 
     """

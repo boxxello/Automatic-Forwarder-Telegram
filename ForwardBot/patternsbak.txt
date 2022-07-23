@@ -1,5 +1,0 @@
-PATTERN=r"([A-Z]{3}[\/I\\\s\-\|]?[A-Z]{3})\s*(BUY|SELL)+\s*(-\d+\.\d+|\d+\.\d+\+|\d+\.\d+)?\s*((SL|TP)?\s*(-\d+\.\d+|\d+\.\d+\+|\d+\.\d+)?\s*(?:(\(?))((-\d+|\d+\+|\d+)?\s*Pips)?(?:\))?)?\s*((SL|TP)?\s*(-\d+\.\d+|\d+\.\d+\+|\d+\.\d+)?\s*(?:(\(?))((-\d+|\d+\+|\d+)?\s*Pips)?(?:\))?)?\s*(Intra-Day Trade|SWING TRADE)?\s*"
-
-PATTERNURL=r"(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?"
-PATTERN2=r"([A-Z]{3}[\/I\\\s\-\|]?[A-Z]{3}|[A-Z]{4})\s*(\(?Intra-Day\s*\d*[A-Z|a-z]{2}\s*Entry\)?)?\s*(Running|Closed|Close)\s*(With)?(-\s*\d+|\s*\d+\+|\s*\d+)?\s*((Pips)?)\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?"
-PATTERN3=r"([A-Z]{3}[\/I\\\s\-\|]?[A-Z]{3}|[A-Z]{4})\s*(Trade\s*Recap:)?\s*((SL|TP)?)\s*((Hit)?)\s*(-\d+|\d+\+|\d+)?\s*(&\s*(-\d+|\d+\+|\d+)?)?\s*((Pips)+)?\s*"
