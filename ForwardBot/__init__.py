@@ -1,13 +1,17 @@
 import asyncio
+import json
 
 import os
+import pickle
 
 import sys
 from datetime import datetime
+from uuid import uuid4
 
 import motor.motor_asyncio
 import pymongo
 import pyrogram.types
+from bson import Binary
 from pyrogram import Client as TelegramClient
 
 from pymongo.errors import ConnectionFailure
@@ -17,7 +21,6 @@ import ForwardBot
 from ForwardBot.logger import get_logger_no_file_h, get_logger
 from ForwardBot.BotConfig import Config
 from ForwardBot.const_dirs import const_dirs_class
-
 
 const_values = const_dirs_class()
 const_values.make_dir()
@@ -52,7 +55,6 @@ else:
 COUNTRY = str(os.environ.get("COUNTRY", "ID"))
 TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 
-
 if Config.SUDO_USERS_INT is None:
     LOGS.info("SUDO_USERS is None. Exiting...")
     sys.exit(1)
@@ -67,11 +69,9 @@ async def set_chat_id(bot: TelegramClient, channel_name: str) -> int:
     LOGS.warning(f"{Config.CHANNEL_NAME_CLIENT} chat not found.")
     sys.exit()
 
+
 def unwrap_dict(obj, classkey=None):
-    if isinstance(obj, pyrogram.types.messages_and_media.message.Str):
-        return obj
-    if isinstance(obj, MessageEntityType):
-        return obj.__str__()
+    LOGS.info("VENGO CHIAMATA")
     if isinstance(obj, dict):
         data = {}
         for (k, v) in obj.items():
@@ -82,11 +82,10 @@ def unwrap_dict(obj, classkey=None):
     elif hasattr(obj, "__iter__") and not isinstance(obj, str):
         return [unwrap_dict(v, classkey) for v in obj]
     elif hasattr(obj, "__dict__"):
-        data={}
+        data = {}
         for key, value in obj.__dict__.items():
             if not key.startswith("_") and not callable(value):
                 data[key] = unwrap_dict(value, classkey)
-
 
         if classkey is not None and hasattr(obj, "__class__"):
             data[classkey] = obj.__class__.__name__
@@ -95,6 +94,7 @@ def unwrap_dict(obj, classkey=None):
         return obj.strftime("%Y-%m-%d %H:%M:%S%z")
     else:
         return obj
+
 
 with bot:
     try:
@@ -116,7 +116,6 @@ with bot:
             "valid entity. Check your environment file.")
         LOGS.info(e)
         quit(1)
-
 
 with bot:
     try:
@@ -153,16 +152,48 @@ LOGS.info(f"Db name {db.name}, collection names {bot.loop.run_until_complete(db.
 #     if document['_id'] is not None:
 #         LOGS.info(f"DOCUMENTO {document}")
 
+# async def get_all_messages_to_db():
+#     message_dict = {}
+#     async for message in bot.get_chat_history(chat_id=Config.CLIENT_CHANNEL_ID):
+#         if isinstance(message, pyrogram.types.Message):
+#             # LOGS.info(message)
+#             # LOGS.info(type(message))
+#             message_dict = unwrap_dict(message)
+#         # LOGS.info(message_dict)
+#         await collezione_get.update_one(filter={"id": message_dict.get('id')}, update={'$setOnInsert': message_dict},
+#                                         upsert=True)
 async def get_all_messages_to_db():
-    message_dict = {}
     async for message in bot.get_chat_history(chat_id=Config.CLIENT_CHANNEL_ID):
         if isinstance(message, pyrogram.types.Message):
             # LOGS.info(message)
             # LOGS.info(type(message))
-            message_dict = unwrap_dict(message)
+
+            # message_dict = str(message)
+            # LOGS.info(type(message_dict))
+            # message_obj_json = json.loads(message_dict)
+            # LOGS.info(message_obj_json)
+            # LOGS.info(type(message_obj_json))
+
+            repr_message = repr(message)
+            LOGS.info(repr_message)
+            LOGS.info(type(repr_message))
+            pickled_obj = pickle.dumps(message)
+            LOGS.info(pickled_obj)
+            LOGS.info(type(pickled_obj))
+
+            # await collezione_get.insert_one({'id': message.id, 'data': pickled_obj})
+            #update the value of the data
+            await collezione_get.update_one(filter={"id": message.id}, update={'$set': {'data': pickled_obj}},upsert=True)
+            # #find the document
+            # document = await collezione_get.find_one({"id": message.id})
+            # #get the data from it
+            # data = document['data']
+            # #unpickle the data
+            # unpickled_obj = pickle.loads(data)
+            # LOGS.info(unpickled_obj.id)
+
         # LOGS.info(message_dict)
-        await collezione_get.update_one(filter={"id": message_dict.get('id')}, update={'$setOnInsert': message_dict},
-                                        upsert=True)
+
 
 #
 with bot:

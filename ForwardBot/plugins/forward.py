@@ -1,3 +1,4 @@
+import pickle
 import re
 import pyrogram
 from pyrogram import enums
@@ -9,34 +10,40 @@ from ForwardBot.events import register, message_deleted
 
 @register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
-    new_dictionary = unwrap_dict(event)
+    pickled_obj = pickle.dumps(event)
     # LOGS.info(event)
     # LOGS.info(new_dictionary)
     if event.text is not None:
-        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {repr(event.text)}")
+        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {event.text}")
 
         # await bot.send_message(chat_id=Config.BOT_CHANNEL_ID, text=f"{event.text}")
-        if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
-            await collezione_get.insert_one(new_dictionary)
+        if not re.match(r"\.(?: |$)?(.*)", event.text):
+            await collezione_get.insert_one({'id': event.id, 'data': pickled_obj})
             # check if is reply
-            if new_dictionary.get('reply_to_message_id'):
+            if event.reply_to_message_id:
                 LOGS.info(f"CAUGHT REPLY")
-                the_Dict = await collezione_get.find_one({'id': new_dictionary.get('reply_to_message_id')})
+                the_Dict = await collezione_get.find_one({'id': event.reply_to_message_id})
                 LOGS.info(f"Dict of the event that got a reply: {the_Dict}")
 
                 other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
                 if other_dict is not None:
-                    LOGS.info(f"DICT OLD  MESSAGE  {other_dict}")
+                    document = await collezione_get.find_one({"id": event.id})
+                    # get the data from it
+                    data = document['data']
+                    # unpickle the data
+                    unpickled_obj = pickle.loads(data)
+
+                    LOGS.info(f"OLD  MESSAGE  {unpickled_obj.text}")
                     LOGS.info(
-                        f"It is a reply to the message id: {other_dict.get('id')}, text in the message: {other_dict.get('text')}")
-                    await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], True,
-                                                    other_dict.get('id'))
+                        f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {other_dict.text}")
+                    await send_msg_if_pattern_match(event.text, str(event.id), True,
+                                                    unpickled_obj.id)
                     return
                 else:
                     LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
                     return
 
-            await send_msg_if_pattern_match(new_dictionary["text"], new_dictionary["id"], False, "")
+            await send_msg_if_pattern_match(event.text, event.id, False, "")
         else:
             LOGS.info("Command registered")
         LOGS.info(f"-----MESSAGE ACQUIRED BLOCK FINISH------")
@@ -90,10 +97,9 @@ async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply:
             msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}',
                                               reply_to_message_id=input_reply_message_id)
 
-        dict_event = unwrap_dict(msgsent_)
-        dict_event.update({Config.SUFFIX_KEY_ID_DBMS: messageid})
-        LOGS.info(f"MESSAGE SENT {dict_event}")
-        LOGS.info(f"Text in the message {msgsent_.text}")
+        dict_event = {'id':msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
+
+        LOGS.info(f"Text in the message {msgsent_.text}, id: {msgsent_.id}")
         await collezione_fw.insert_one(dict_event)
 
 
@@ -196,22 +202,27 @@ async def handler(event: pyrogram.types.Message):
     # LOGS.info(event)
     try:
 
-        edited_message_real_dict = unwrap_dict(event)
-
-        LOGS.info(f"PRINTING EDITED MESSAGE {edited_message_real_dict.get('text')}")
-        if (return_tuple_match := check_for_pattern_match(edited_message_real_dict.get('text'))) != (-1, None):
+        LOGS.info(f"PRINTING EDITED MESSAGE {event.text}")
+        if (return_tuple_match := check_for_pattern_match(event.text)) != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
-            if (the_Dict := await collezione_fw.find_one(
-                    {Config.SUFFIX_KEY_ID_DBMS: edited_message_real_dict.get('id')})) is not None:
 
-                LOGS.info(f"Printing retrieved {the_Dict.get('text')}")
-                LOGS.info(f"Printing retrieved message id: {the_Dict.get(Config.SUFFIX_KEY_ID_DBMS)}")
+            if (document := await collezione_fw.find_one(
+                    {Config.SUFFIX_KEY_ID_DBMS: event.id})) is not None:
+
+                # get the data from it
+                data = document['data']
+                # unpickle the data
+                unpickled_obj = pickle.loads(data)
+
+
+
+                LOGS.info(f"Printing retrieved message id: {unpickled_obj.id}")
 
                 LOGS.info(f"EDITING MSG FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
                 # here i try to edit the message on the end channel by the end channel id
                 text_message = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
-                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID, message_id=the_Dict.get('id'))
+                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID, message_id=unpickled_obj.id)
 
 
 
@@ -219,7 +230,7 @@ async def handler(event: pyrogram.types.Message):
                 LOGS.info(
                     f"NO MESSAGE WAS FOUND IN THE COLLECTION  TO EDIT BUT IT MATCHED THE PATTERN, SENDING THE MESSAGE")
                 await send_msg_if_pattern_match(text_message=return_tuple_match[1],
-                                                messageid=edited_message_real_dict.get('id'))
+                                                messageid=str(event.id))
         LOGS.info(f"----EDITED MESSAGE BLOCK FINISH----")
     except Exception as e:
         LOGS.error(f"ERROR {e}")
@@ -230,13 +241,13 @@ async def handler(event: pyrogram.types.Message):
 @message_deleted(chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
-    # LOGS.info(event)
+    LOGS.info(event)
     edited_message_real_dict = unwrap_dict(event)
 
     LOGS.info(
-        f"{len(edited_message_real_dict)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
+        f"{len(event)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
 
-    for count, message in enumerate(edited_message_real_dict):
+    for count, message in enumerate(event):
         deleted_id = message.get('id')
         deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
         if deleted_message_from_start_chat is not None:
