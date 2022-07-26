@@ -1,16 +1,21 @@
 import re
 import pyrogram
+from pyrogram import enums
+
 from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
 
 
-@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
+@register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
     new_dictionary = unwrap_dict(event)
+    # LOGS.info(event)
+    # LOGS.info(new_dictionary)
     if event.text is not None:
-        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {event.text}")
+        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {repr(event.text)}")
 
+        # await bot.send_message(chat_id=Config.BOT_CHANNEL_ID, text=f"{event.text}")
         if not re.match(r"\.(?: |$)?(.*)", new_dictionary.get('text')):
             await collezione_get.insert_one(new_dictionary)
             # check if is reply
@@ -185,7 +190,7 @@ def remove_optional_info(matches: re.Match, pattern) -> tuple:
     return False, ""
 
 
-@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
+@register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
     # LOGS.info(event)

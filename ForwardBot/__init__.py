@@ -11,6 +11,7 @@ import pyrogram.types
 from pyrogram import Client as TelegramClient
 
 from pymongo.errors import ConnectionFailure
+from pyrogram.enums import MessageEntityType
 
 import ForwardBot
 from ForwardBot.logger import get_logger_no_file_h, get_logger
@@ -69,6 +70,8 @@ async def set_chat_id(bot: TelegramClient, channel_name: str) -> int:
 def unwrap_dict(obj, classkey=None):
     if isinstance(obj, pyrogram.types.messages_and_media.message.Str):
         return obj
+    if isinstance(obj, MessageEntityType):
+        return obj.__str__()
     if isinstance(obj, dict):
         data = {}
         for (k, v) in obj.items():
