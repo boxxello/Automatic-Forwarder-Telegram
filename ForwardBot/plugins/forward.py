@@ -239,34 +239,31 @@ async def handler(event: pyrogram.types.Message):
 
 ## @bot.on_deleted_messages(filters=filters.chat(Config.CLIENT_CHANNEL_ID))
 @message_deleted(chat_id=Config.CLIENT_CHANNEL_ID)
-async def handler(event: pyrogram.types.Message):
+async def handler(event: pyrogram.types.List):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
     LOGS.info(event)
-    edited_message_real_dict = unwrap_dict(event)
+
 
     LOGS.info(
-        f"{len(event)} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
+        f"{[x.id for x in event]} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
 
     for count, message in enumerate(event):
-        deleted_id = message.get('id')
+        deleted_id = message.id
         deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
         if deleted_message_from_start_chat is not None:
-            LOGS.info(f"Message #{count + 1} that got deleted {deleted_message_from_start_chat.get('text')}")
+            # get the data from it
+            data = deleted_message_from_start_chat['data']
+            # unpickle the data
+            unpickled_obj = pickle.loads(data)
+            LOGS.info(f"Message #{count + 1} that got deleted {unpickled_obj.text}")
             if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
-                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[the_Dict.get('id')], revoke=True)
+                data_ = the_Dict['data']
+                unpickled_obj_ = pickle.loads(data_)
+                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[unpickled_obj_.id], revoke=True)
                 await collezione_fw.delete_one(the_Dict)
-                await collezione_get.delete_one({'id': deleted_id})
+            await collezione_get.delete_one(deleted_message_from_start_chat)
         else:
             LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
 
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
-    # cursor = collection.find({})
-    # for document in cursor:
-    #     print(document)
-    #     if document['_id'] is not None:
-    #         print(document['_id'])
-    # with open("events.json", "a") as f:
-    #     json.dump(new_dictionary, f, indent=2, default=str)
-    # print(inspect.getmro(telethon.types.Message))
-    # top class is  <class 'telethon.tl.tlobject.TLObject'> and obviously <class 'object'>)

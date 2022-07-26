@@ -175,11 +175,11 @@ async def get_all_messages_to_db():
             # LOGS.info(type(message_obj_json))
 
             repr_message = repr(message)
-            LOGS.info(repr_message)
-            LOGS.info(type(repr_message))
+            #LOGS.info(repr_message)
+            #LOGS.info(type(repr_message))
             pickled_obj = pickle.dumps(message)
-            LOGS.info(pickled_obj)
-            LOGS.info(type(pickled_obj))
+            #LOGS.info(pickled_obj)
+            #LOGS.info(type(pickled_obj))
 
             # await collezione_get.insert_one({'id': message.id, 'data': pickled_obj})
             #update the value of the data
