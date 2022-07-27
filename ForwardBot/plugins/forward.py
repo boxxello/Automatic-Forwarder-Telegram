@@ -5,7 +5,7 @@ from pyrogram import enums
 from pyrogram.enums import ParseMode
 from pyrogram.raw.functions.updates import GetState, GetDifference
 
-from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
+from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict, BotConfig
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
 from datetime import datetime
@@ -65,7 +65,7 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
         LOGS.info(f"A link was removed, actual msg {text_message}")
 
     val_ret, text_message = check_for_pattern_match(text_message)
-    if val_ret!=-1 and text_message==None:
+    if val_ret != -1 and text_message == None:
         LOGS.info(f"PATTERN MATCH FOUND BUT CONTAINED PATTERN TO EXCLUDE, message discarded")
         return
     elif val_ret != -1 and text_message != None:
@@ -253,12 +253,28 @@ def remove_message_if_opt(matches: re.Match, pattern) -> bool:
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
     # LOGS.info(event)
+    pickled_obj = pickle.dumps(event)
+    await collezione_get.update_one(filter={"id": event.id}, update={'$set': {'data': pickled_obj}},
+                                    upsert=True)
     try:
 
         LOGS.info(f"PRINTING EDITED MESSAGE {event.text}")
-        if check_for_pattern_match(event.text)[1] == None and check_for_pattern_match(event.text)[0]!=-1:
-            LOGS.info(f"MATCH EDITED MESSAGE BUT CONTAINED A PATTERN TO REMOVE, SO MESSAGE WAS EXCLUDED")
-        elif (return_tuple_match := check_for_pattern_match(event.text)) != (-1, None):
+        return_tuple_match = check_for_pattern_match(event.text)
+        if return_tuple_match[1] == None and return_tuple_match[0] != -1:
+            deleted_message_from_end_chat = await collezione_fw.find_one(
+                {BotConfig.Config.SUFFIX_KEY_ID_DBMS: event.id})
+            if deleted_message_from_end_chat:
+                # get data and then id from collection document
+                pickled_end_document = pickle.loads(deleted_message_from_end_chat['data'])
+                # await collezione_fw.delete_one({'id': deleted_message_from_end_chat['id']})
+                await collezione_fw.delete_one(deleted_message_from_end_chat)
+                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[pickled_end_document.id],
+                                          revoke=True)
+                LOGS.info(
+                    f"MATCH EDITED MESSAGE BUT CONTAINED A PATTERN TO REMOVE, SO MESSAGE WAS EXCLUDED AND MESSAGE WAS DELETED")
+                return
+            LOGS.error("MATCHED BUT NO MESSAGE WAS FOUND IN THE END CHAT DATABASE")
+        elif return_tuple_match != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
 
@@ -282,10 +298,14 @@ async def handler(event: pyrogram.types.Message):
                                 x.offset += prefix_length + 1
 
                 LOGS.info(f"TEXT EDITED WITH SUFFIX AND PREFIX:\n{text_message}")
-                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
+                unpickled_obj=await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
                                             message_id=unpickled_obj.id, entities=event.entities,
                                             parse_mode=ParseMode.DEFAULT)
+                pickled_obj_edited = pickle.dumps(event)
 
+                await collezione_fw.update_one(filter={"id": unpickled_obj.id},
+                                               update={'$set': {'data': pickled_obj_edited}},
+                                               upsert=True)
 
 
             else:
@@ -293,6 +313,9 @@ async def handler(event: pyrogram.types.Message):
                     f"NO MESSAGE WAS FOUND IN THE COLLECTION  TO EDIT BUT IT MATCHED THE PATTERN, SENDING THE MESSAGE")
                 await send_msg_if_pattern_match(text_message=return_tuple_match[1],
                                                 messageid=event.id, entities=event.entities)
+                #insertion to db is done internally in the send_msg_if_pattern_match function
+                #no need to do it here.
+
         LOGS.info(f"----EDITED MESSAGE BLOCK FINISH----")
     except Exception as e:
         LOGS.error(f"ERROR {e}")
@@ -307,26 +330,29 @@ async def handler(event: pyrogram.types.List):
 
     LOGS.info(
         f"{[x.id for x in event]} DELETED MESSAGE FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
+    try:
+        for count, message in enumerate(event):
+            deleted_id = message.id
+            deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
+            if deleted_message_from_start_chat is not None:
+                # get the data from it
+                data = deleted_message_from_start_chat['data']
+                # unpickle the data
+                unpickled_obj = pickle.loads(data)
+                LOGS.info(f"Message #{count + 1} that got deleted {unpickled_obj.text}")
+                if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
+                    data_ = the_Dict['data']
+                    unpickled_obj_ = pickle.loads(data_)
+                    await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[unpickled_obj_.id], revoke=True)
+                    await collezione_fw.delete_one(the_Dict)
+                await collezione_get.delete_one(deleted_message_from_start_chat)
+            else:
+                LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
+        LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
+    except Exception as e:
+        LOGS.error(f"ERROR {e}")
+        LOGS.info(f"----EXCEPTION THROWN, DELETED MESSAGE BLOCK FINISH----")
 
-    for count, message in enumerate(event):
-        deleted_id = message.id
-        deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
-        if deleted_message_from_start_chat is not None:
-            # get the data from it
-            data = deleted_message_from_start_chat['data']
-            # unpickle the data
-            unpickled_obj = pickle.loads(data)
-            LOGS.info(f"Message #{count + 1} that got deleted {unpickled_obj.text}")
-            if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
-                data_ = the_Dict['data']
-                unpickled_obj_ = pickle.loads(data_)
-                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[unpickled_obj_.id], revoke=True)
-                await collezione_fw.delete_one(the_Dict)
-            await collezione_get.delete_one(deleted_message_from_start_chat)
-        else:
-            LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
-
-    LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
 
 @pyrogram.Client.on_raw_update()
