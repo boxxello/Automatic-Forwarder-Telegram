@@ -2,6 +2,7 @@ import pickle
 import re
 import pyrogram
 from pyrogram import enums
+from pyrogram.enums import ParseMode
 from pyrogram.raw.functions.updates import GetState, GetDifference
 
 from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
@@ -37,14 +38,14 @@ async def handler(event: pyrogram.types.Message):
 
                     LOGS.info(
                         f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {unpickled_obj.text}")
-                    await send_msg_if_pattern_match(event.text, event.id, True,
+                    await send_msg_if_pattern_match(event.text, event.entities, event.id, True,
                                                     unpickled_obj.id)
                     return
                 else:
                     LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
                     return
 
-            await send_msg_if_pattern_match(event.text, event.id, False, "")
+            await send_msg_if_pattern_match(event.text, event.entities, event.id, False, "")
         else:
             LOGS.info("Command registered")
         LOGS.info(f"-----MESSAGE ACQUIRED BLOCK FINISH------")
@@ -52,7 +53,7 @@ async def handler(event: pyrogram.types.Message):
         LOGS.info(f"-----Message has got no text in it. DISCARDING ------")
 
 
-async def send_msg_if_pattern_match(text_message: str, messageid: int, is_reply: bool = None,
+async def send_msg_if_pattern_match(text_message: str, entities, messageid: int, is_reply: bool = None,
                                     input_reply_message_id: str = None):
     if not is_reply:
         LOGS.info(f"Trying to forward message: {text_message}")
@@ -89,16 +90,25 @@ async def send_msg_if_pattern_match(text_message: str, messageid: int, is_reply:
             LOGS.warning(
                 f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
             return
-        text_message = add_prefix_suffix(val_ret, text_message)
+        #walrus operator on add_prefix_suffix assigning it to a value
+
+        text_message, prefix_length= add_prefix_suffix(val_ret, text_message)
+        LOGS.info(f"PREFIX LENGTH: {prefix_length}")
+
+        if entities:
+            if prefix_length!=-1:
+                for x in entities:
+                    x.offset += prefix_length + 1
+
         if not is_reply:
-            msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}')
+            msgsent_ = await bot.send_message(text=text_message, entities=entities, chat_id=f'{Config.BOT_CHANNEL_ID}')
         else:
-            msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}',
+            msgsent_ = await bot.send_message(text=text_message, entities=entities, chat_id=f'{Config.BOT_CHANNEL_ID}',
                                               reply_to_message_id=input_reply_message_id)
 
         dict_event = {'id': msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
 
-        LOGS.info(f"Forwarded CText in the message {msgsent_.text}, id: {msgsent_.id}")
+        LOGS.info(f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text},")
         await collezione_fw.insert_one(dict_event)
 
 
@@ -119,43 +129,67 @@ async def send_msg_if_pattern_match(text_message: str, messageid: int, is_reply:
     #                     f"END------------\n\n\n".encode("UTF-8"))
 
 
-def add_prefix_suffix(val_ret: int, text_message: str) -> str:
-    if val_ret == 1:
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN1"]["prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN1"]["suffix"]
-    elif val_ret == 2:
+# def add_prefix_suffix(val_ret: int, text_message: str) -> str:
+#     if val_ret == 1:
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN1"]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN1"]["suffix"]
+#     elif val_ret == 2:
+#
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN2"]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN2"]["suffix"]
+#
+#     elif val_ret == 3:
+#
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN3"]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN3"]["suffix"]
+#
+#     elif val_ret == 4:
+#
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN4"]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN4"]["suffix"]
+#
+#
+#     elif val_ret == 5:
+#
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN5"]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN5"]["suffix"]
+#     elif val_ret == 6:
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN6"][
+#                            "prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN6"]["suffix"]
+#     elif val_ret == 7:
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN7"][
+#                            "prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN7"]["suffix"]
+#     elif val_ret == 8:
+#         text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN8"][
+#                            "prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN8"]["suffix"]
+#     return text_message
 
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN2"]["prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN2"]["suffix"]
-        pass
-    elif val_ret == 3:
+# def add_prefix_suffix(val_ret: int, text_message: str) -> str:
+#     patterns = ["PATTERN1", "PATTERN2", "PATTERN3"]
+#     return Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][patterns[val_ret]]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][patterns[val_ret]]["suffix"]
+#
+# def add_prefix_suffix(val_ret: int, text_message: str) -> str:
+#   if val_ret in [1,2,3]:
+#     key = f"PATTERN{val_ret}"
+#     text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"] + text_message + \
+#                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
+#   else:
+#     text_message = "something"
+#   return text_message
 
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN3"]["prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN3"]["suffix"]
-        pass
-    elif val_ret == 4:
 
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN4"]["prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN4"]["suffix"]
+def add_prefix_suffix(val_ret: int, text_message: str) -> tuple:
+  if val_ret in range(1,9):
+    key = f"PATTERN{val_ret}"
+    prefix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"]
+    suffix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
+    return prefix+text_message+suffix, len(prefix)
+  return text_message,-1
 
-        pass
-    elif val_ret == 5:
-
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN5"]["prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN5"]["suffix"]
-    elif val_ret == 6:
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN6"][
-                           "prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN6"]["suffix"]
-    elif val_ret == 7:
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN7"][
-                           "prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN7"]["suffix"]
-    elif val_ret == 8:
-        text_message = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN8"][
-                           "prefix"] + text_message + \
-                       Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"]["PATTERN8"]["suffix"]
-    return text_message
 
 
 def check_for_pattern_match(event_text: str) -> tuple:
@@ -214,13 +248,21 @@ async def handler(event: pyrogram.types.Message):
                 # unpickle the data
                 unpickled_obj = pickle.loads(data)
 
-                LOGS.info(f"Printing retrieved message id: {unpickled_obj.id}")
 
-                LOGS.info(f"EDITING MSG FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
+                LOGS.info(f"EDITING MSG {unpickled_obj.id} FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
+
                 # here i try to edit the message on the end channel by the end channel id
-                text_message = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
+                text_message, prefix_length = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
+                if event.entities:
+                    if len(unpickled_obj.text)!=len(event.text):
+                        if prefix_length != -1:
+                            for x in event.entities:
+                                x.offset += prefix_length + 1
+
+
+                LOGS.info(f"TEXT EDITED WITH SUFFIX AND PREFIX:\n{text_message}")
                 await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
-                                            message_id=unpickled_obj.id)
+                                            message_id=unpickled_obj.id, entities=event.entities, parse_mode=ParseMode.DEFAULT)
 
 
 
@@ -228,7 +270,7 @@ async def handler(event: pyrogram.types.Message):
                 LOGS.info(
                     f"NO MESSAGE WAS FOUND IN THE COLLECTION  TO EDIT BUT IT MATCHED THE PATTERN, SENDING THE MESSAGE")
                 await send_msg_if_pattern_match(text_message=return_tuple_match[1],
-                                                messageid=str(event.id))
+                                                messageid=event.id, entities=event.entities)
         LOGS.info(f"----EDITED MESSAGE BLOCK FINISH----")
     except Exception as e:
         LOGS.error(f"ERROR {e}")
