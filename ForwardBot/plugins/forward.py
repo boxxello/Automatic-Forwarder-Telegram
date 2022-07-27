@@ -2,10 +2,12 @@ import pickle
 import re
 import pyrogram
 from pyrogram import enums
+from pyrogram.raw.functions.updates import GetState, GetDifference
 
 from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
+from datetime import datetime
 
 
 @register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID)
@@ -14,7 +16,7 @@ async def handler(event: pyrogram.types.Message):
     # LOGS.info(event)
     # LOGS.info(new_dictionary)
     if event.text is not None:
-        LOGS.info(f"-----MESSAGE BLOCK STARTED ------\n\nMESSAGE ACQUIRED: {event.text}")
+        LOGS.info(f"-----MESSAGE BLOCK STARTED - MESSAGE ID {event.id} ------\n\n MESSAGE ACQUIRED: {event.text}")
 
         # await bot.send_message(chat_id=Config.BOT_CHANNEL_ID, text=f"{event.text}")
         if not re.match(r"\.(?: |$)?(.*)", event.text):
@@ -27,16 +29,16 @@ async def handler(event: pyrogram.types.Message):
 
                 other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
                 if other_dict is not None:
-                    document = await collezione_get.find_one({"id": event.id})
+                    document = await collezione_get.find_one({"id": the_Dict.get('id')})
                     # get the data from it
                     data = document['data']
                     # unpickle the data
                     unpickled_obj = pickle.loads(data)
 
-                    LOGS.info(f"OLD  MESSAGE  {unpickled_obj.text}")
+
                     LOGS.info(
-                        f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {other_dict.text}")
-                    await send_msg_if_pattern_match(event.text, str(event.id), True,
+                        f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {unpickled_obj.text}")
+                    await send_msg_if_pattern_match(event.text, event.id, True,
                                                     unpickled_obj.id)
                     return
                 else:
@@ -51,8 +53,7 @@ async def handler(event: pyrogram.types.Message):
         LOGS.info(f"-----Message has got no text in it. DISCARDING ------")
 
 
-
-async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply: bool = None,
+async def send_msg_if_pattern_match(text_message: str, messageid: int, is_reply: bool = None,
                                     input_reply_message_id: str = None):
     if not is_reply:
         LOGS.info(f"Trying to forward message: {text_message}")
@@ -71,7 +72,7 @@ async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply:
         # for matchNum, match in enumerate(matches, start=1):
         #     my_dict = match.capturesdict()
         # LOGS.info(my_dict)
-        input_symbols = Symb_Config.extractor.extract(text_message)
+        input_symbols = Symb_Config.extractor.extract(text_message.upper())
 
         LOGS.info(f"SYMBOLS FOUND IN THE MESSAGE (if any): {input_symbols}")
         if input_symbols:
@@ -90,16 +91,15 @@ async def send_msg_if_pattern_match(text_message: str, messageid: str, is_reply:
                 f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
             return
         text_message = add_prefix_suffix(val_ret, text_message)
-        LOGS.info(messageid)
         if not is_reply:
             msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}')
         else:
             msgsent_ = await bot.send_message(text=text_message, chat_id=f'{Config.BOT_CHANNEL_ID}',
                                               reply_to_message_id=input_reply_message_id)
 
-        dict_event = {'id':msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
+        dict_event = {'id': msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
 
-        LOGS.info(f"Text in the message {msgsent_.text}, id: {msgsent_.id}")
+        LOGS.info(f"Forwarded CText in the message {msgsent_.text}, id: {msgsent_.id}")
         await collezione_fw.insert_one(dict_event)
 
 
@@ -165,7 +165,7 @@ def check_for_pattern_match(event_text: str) -> tuple:
     elif matches := (re.match(Config.PATTERN1, event_text, flags=(re.IGNORECASE | re.UNICODE | re.MULTILINE))):
         return 1, event_text
     elif matches := (re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE)):
-        return (2, ret_[1]) if (ret_ :=remove_optional_info(matches, "PATTERN2"))[0] else (2, event_text)
+        return (2, ret_[1]) if (ret_ := remove_optional_info(matches, "PATTERN2"))[0] else (2, event_text)
     elif matches := (re.match(Config.PATTERN3, event_text, flags=re.IGNORECASE)):
         return 3, event_text
     elif matches := (re.match(Config.PATTERN4, event_text, flags=re.IGNORECASE)):
@@ -175,7 +175,7 @@ def check_for_pattern_match(event_text: str) -> tuple:
     elif matches := (re.match(Config.PATTERN6, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 6, event_text
     elif matches := (re.match(Config.PATTERN7, event_text, flags=re.IGNORECASE | re.MULTILINE)):
-        return (7, ret_[1]) if (ret_ :=remove_optional_info(matches, "PATTERN7"))[0] else (7, event_text)
+        return (7, ret_[1]) if (ret_ := remove_optional_info(matches, "PATTERN7"))[0] else (7, event_text)
         # if (ret_ := baz("aaa", "bb"))[0]:
         #     return 7, ret_[1]
     elif matches := (re.match(Config.PATTERN8, event_text, flags=re.IGNORECASE | re.MULTILINE)):
@@ -215,14 +215,13 @@ async def handler(event: pyrogram.types.Message):
                 # unpickle the data
                 unpickled_obj = pickle.loads(data)
 
-
-
                 LOGS.info(f"Printing retrieved message id: {unpickled_obj.id}")
 
                 LOGS.info(f"EDITING MSG FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
                 # here i try to edit the message on the end channel by the end channel id
                 text_message = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
-                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID, message_id=unpickled_obj.id)
+                await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
+                                            message_id=unpickled_obj.id)
 
 
 
@@ -243,9 +242,8 @@ async def handler(event: pyrogram.types.List):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK START----")
     LOGS.info(event)
 
-
     LOGS.info(
-        f"{[x.id for x in event]} DELETED MESSAGES FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
+        f"{[x.id for x in event]} DELETED MESSAGE FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
 
     for count, message in enumerate(event):
         deleted_id = message.id
@@ -265,5 +263,21 @@ async def handler(event: pyrogram.types.List):
         else:
             LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
 
+
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
+
+@pyrogram.Client.on_raw_update()
+async def handler(event):
+    LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK START----")
+    if isinstance(event, pyrogram.raw.types.UpdatesTooLong):
+        # handle the update by calling GetDifference
+        getstate = await bot.invoke(
+            GetState()
+        )
+
+        await bot.invoke(
+            GetDifference(pts=getstate.pts, date=getstate.date, qts=getstate.qts))
+        LOGS.info(f"pts: {getstate.pts}, date: {getstate.date}, qts: {getstate.qts}")
+
+        LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK END----")
