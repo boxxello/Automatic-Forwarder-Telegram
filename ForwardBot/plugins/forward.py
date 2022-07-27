@@ -29,9 +29,8 @@ async def handler(event: pyrogram.types.Message):
 
                 other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
                 if other_dict is not None:
-                    document = await collezione_get.find_one({"id": the_Dict.get('id')})
                     # get the data from it
-                    data = document['data']
+                    data = other_dict['data']
                     # unpickle the data
                     unpickled_obj = pickle.loads(data)
 
