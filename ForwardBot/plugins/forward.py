@@ -35,7 +35,6 @@ async def handler(event: pyrogram.types.Message):
                     # unpickle the data
                     unpickled_obj = pickle.loads(data)
 
-
                     LOGS.info(
                         f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {unpickled_obj.text}")
                     await send_msg_if_pattern_match(event.text, event.entities, event.id, True,
@@ -66,7 +65,10 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
         LOGS.info(f"A link was removed, actual msg {text_message}")
 
     val_ret, text_message = check_for_pattern_match(text_message)
-    if val_ret != -1:
+    if val_ret!=-1 and text_message==None:
+        LOGS.info(f"PATTERN MATCH FOUND BUT CONTAINED PATTERN TO EXCLUDE, message discarded")
+        return
+    elif val_ret != -1 and text_message != None:
         LOGS.info(f"MATCH {val_ret}")
         # matches = regex.finditer(Config.PATTERN1, text_message, re.M)
         # for matchNum, match in enumerate(matches, start=1):
@@ -90,13 +92,13 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
             LOGS.warning(
                 f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
             return
-        #walrus operator on add_prefix_suffix assigning it to a value
+        # walrus operator on add_prefix_suffix assigning it to a value
 
-        text_message, prefix_length= add_prefix_suffix(val_ret, text_message)
+        text_message, prefix_length = add_prefix_suffix(val_ret, text_message)
         LOGS.info(f"PREFIX LENGTH: {prefix_length}")
 
         if entities:
-            if prefix_length!=-1:
+            if prefix_length != -1:
                 for x in entities:
                     x.offset += prefix_length + 1
 
@@ -183,13 +185,12 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
 
 
 def add_prefix_suffix(val_ret: int, text_message: str) -> tuple:
-  if val_ret in range(1,9):
-    key = f"PATTERN{val_ret}"
-    prefix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"]
-    suffix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
-    return prefix+text_message+suffix, len(prefix)
-  return text_message,-1
-
+    if val_ret in range(1, 9):
+        key = f"PATTERN{val_ret}"
+        prefix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"]
+        suffix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
+        return prefix + text_message + suffix, len(prefix)
+    return text_message, -1
 
 
 def check_for_pattern_match(event_text: str) -> tuple:
@@ -198,7 +199,10 @@ def check_for_pattern_match(event_text: str) -> tuple:
     elif matches := (re.match(Config.PATTERN1, event_text, flags=(re.IGNORECASE | re.UNICODE | re.MULTILINE))):
         return 1, event_text
     elif matches := (re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE)):
-        return (2, ret_[1]) if (ret_ := remove_optional_info(matches, "PATTERN2"))[0] else (2, event_text)
+        if remove_message_if_opt(matches, "PATTERN2"):
+            return 2, None
+        else:
+            return 2, event_text
     elif matches := (re.match(Config.PATTERN3, event_text, flags=re.IGNORECASE)):
         return 3, event_text
     elif matches := (re.match(Config.PATTERN4, event_text, flags=re.IGNORECASE)):
@@ -208,9 +212,15 @@ def check_for_pattern_match(event_text: str) -> tuple:
     elif matches := (re.match(Config.PATTERN6, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 6, event_text
     elif matches := (re.match(Config.PATTERN7, event_text, flags=re.IGNORECASE | re.MULTILINE)):
-        return (7, ret_[1]) if (ret_ := remove_optional_info(matches, "PATTERN7"))[0] else (7, event_text)
-        # if (ret_ := baz("aaa", "bb"))[0]:
-        #     return 7, ret_[1]
+        if remove_message_if_opt(matches, "PATTERN7"):
+            return 7, None
+        else:
+            return 7, event_text
+    # elif matches := (re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE)):
+    #     return (2, ret_[1]) if (ret_ := remove_optional_info(matches, "PATTERN2"))[0] else (2, event_text)
+
+    # if (ret_ := baz("aaa", "bb"))[0]:
+    #     return 7, ret_[1]
     elif matches := (re.match(Config.PATTERN8, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 8, event_text
     return -1, event_text
@@ -229,6 +239,16 @@ def remove_optional_info(matches: re.Match, pattern) -> tuple:
     return False, ""
 
 
+def remove_message_if_opt(matches: re.Match, pattern) -> bool:
+    if matches:
+        if matches.lastgroup == "optional_info":
+            if [x for x in
+                Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][pattern]["remove_string"]["optional_info"]
+                if x in matches.group('optional_info')]:
+                return True
+    return False
+
+
 @register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
@@ -236,7 +256,9 @@ async def handler(event: pyrogram.types.Message):
     try:
 
         LOGS.info(f"PRINTING EDITED MESSAGE {event.text}")
-        if (return_tuple_match := check_for_pattern_match(event.text)) != (-1, None):
+        if check_for_pattern_match(event.text)[1] == None and check_for_pattern_match(event.text)[0]!=-1:
+            LOGS.info(f"MATCH EDITED MESSAGE BUT CONTAINED A PATTERN TO REMOVE, SO MESSAGE WAS EXCLUDED")
+        elif (return_tuple_match := check_for_pattern_match(event.text)) != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
 
@@ -248,21 +270,21 @@ async def handler(event: pyrogram.types.Message):
                 # unpickle the data
                 unpickled_obj = pickle.loads(data)
 
-
-                LOGS.info(f"EDITING MSG {unpickled_obj.id} FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
+                LOGS.info(
+                    f"EDITING MSG {unpickled_obj.id} FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
 
                 # here i try to edit the message on the end channel by the end channel id
                 text_message, prefix_length = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
                 if event.entities:
-                    if len(unpickled_obj.text)!=len(event.text):
+                    if len(unpickled_obj.text) != len(event.text):
                         if prefix_length != -1:
                             for x in event.entities:
                                 x.offset += prefix_length + 1
 
-
                 LOGS.info(f"TEXT EDITED WITH SUFFIX AND PREFIX:\n{text_message}")
                 await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
-                                            message_id=unpickled_obj.id, entities=event.entities, parse_mode=ParseMode.DEFAULT)
+                                            message_id=unpickled_obj.id, entities=event.entities,
+                                            parse_mode=ParseMode.DEFAULT)
 
 
 
@@ -303,7 +325,6 @@ async def handler(event: pyrogram.types.List):
             await collezione_get.delete_one(deleted_message_from_start_chat)
         else:
             LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
-
 
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
