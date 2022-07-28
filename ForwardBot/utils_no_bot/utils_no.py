@@ -24,6 +24,7 @@ def retrieve_lines_from_file(path: str) -> list:
 def retrieve_pref_suffix_msg(path: str) -> dict:
     with open(path, encoding='utf-8') as inputfile:
         dict_to_return = json.load(inputfile)
+
     return dict_to_return
 
 
@@ -61,16 +62,17 @@ def create_dict_pref_suffix_msg(path: str) -> dict:
             },
             "PATTERN7": {
                 "prefix": "",
-                "suffix": ""
-            },
-            "PATTERN8": {
-                "prefix": "",
                 "suffix": "",
                 "remove_string": {
                     "optional_info": [
                         "copier user"
                     ]
                 }
+            },
+            "PATTERN8": {
+                "prefix": "",
+                "suffix": "",
+
             }
         }
     }

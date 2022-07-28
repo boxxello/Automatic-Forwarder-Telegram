@@ -1,18 +1,31 @@
 import pickle
 import re
+from typing import Optional
+
 import pyrogram
 from pyrogram import enums
 from pyrogram.enums import ParseMode
 from pyrogram.raw.functions.updates import GetState, GetDifference
+from pyrogram.types import MessageEntity
 
 from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict, BotConfig
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
-from datetime import datetime
 
-
-@register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID)
+@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
+#     message = """GOLD SELL 1745.10
+# SL 1754.00
+# TP Open
+# **SWING TRADE**"""
+#     result = await bot.send_message(chat_id=Config.BOT_CHANNEL_ID,
+#                                     text=f"{Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']+message+    Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['suffix']}")
+#     if result.text:
+#         print(ascii(result.text))
+#         print(len(result.text))
+#         print(ascii(Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']))
+#         print(len(Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']))
+
     pickled_obj = pickle.dumps(event)
     # LOGS.info(event)
     # LOGS.info(new_dictionary)
@@ -25,24 +38,30 @@ async def handler(event: pyrogram.types.Message):
             # check if is reply
             if event.reply_to_message_id:
                 LOGS.info(f"CAUGHT REPLY")
+
                 the_Dict = await collezione_get.find_one({'id': event.reply_to_message_id})
-                LOGS.info(f"Dict of the event that got a reply: {the_Dict}")
+                if the_Dict:
+                    LOGS.info(f"ID OF THE EVENT THAT GOT THE REPLY: {the_Dict.get('id')}")
 
-                other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
-                if other_dict is not None:
-                    # get the data from it
-                    data = other_dict['data']
-                    # unpickle the data
-                    unpickled_obj = pickle.loads(data)
+                    other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
+                    if other_dict is not None:
+                        # get the data from it
+                        data = other_dict['data']
+                        # unpickle the data
+                        unpickled_obj = pickle.loads(data)
 
-                    LOGS.info(
-                        f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {unpickled_obj.text}")
-                    await send_msg_if_pattern_match(event.text, event.entities, event.id, True,
-                                                    unpickled_obj.id)
-                    return
+                        LOGS.info(
+                            f"It is a reply to the message id: {unpickled_obj.id}, text in the message: {unpickled_obj.text}")
+                        await send_msg_if_pattern_match(event.text, event.entities, event.id, True,
+                                                        unpickled_obj.id)
+
+                    else:
+                        LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
+
                 else:
-                    LOGS.info("The message wasn't found in the database, so the reply is not going to be forwarded")
-                    return
+                    LOGS.info(
+                        "The input collection document wasn't found in the database, so the reply is not going to be forwarded")
+                return
 
             await send_msg_if_pattern_match(event.text, event.entities, event.id, False, "")
         else:
@@ -74,33 +93,14 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
         # for matchNum, match in enumerate(matches, start=1):
         #     my_dict = match.capturesdict()
         # LOGS.info(my_dict)
-        input_symbols = Symb_Config.extractor.extract(text_message.upper())
-
-        LOGS.info(f"SYMBOLS FOUND IN THE MESSAGE (if any): {input_symbols}")
-        if input_symbols:
-            # if any(elemen in Symb_Config.SYMB_TO_EXCLUDE for elemen in input_symbols) :
-            # sets are faster
-            # Its going to look through every item in the smaller set and perform a 0(1) lookup to check if its in the other set. So O(1 * len(s)) where s in the shorter of the two
-            # Meanwhite, [x in y_list for x in x_list] is going to do (up to) len(x_list) checks with complexity O(len(y_list))
-            # Hence O(len(x_list) * len(y_list)). Several orders of complexity slower
-
-            if set(input_symbols).intersection(Symb_Config.SYMB_TO_EXCLUDE):
-                LOGS.warning(
-                    f"MATCH WAS FOUND BUT SYMBOL {input_symbols} was discarded. Message not forwarded")
-                return
-        if word_found := set(text_message.upper().split()) & BlacklistWords.WORDS_TO_EXCLUDE_SET:
-            LOGS.warning(
-                f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
+        if not check_for_symbols(text_message):
             return
         # walrus operator on add_prefix_suffix assigning it to a value
 
         text_message, prefix_length = add_prefix_suffix(val_ret, text_message)
         LOGS.info(f"PREFIX LENGTH: {prefix_length}")
 
-        if entities:
-            if prefix_length != -1:
-                for x in entities:
-                    x.offset += prefix_length + 1
+        entities = check_entities(entities, prefix_length)
 
         if not is_reply:
             msgsent_ = await bot.send_message(text=text_message, entities=entities, chat_id=f'{Config.BOT_CHANNEL_ID}')
@@ -109,8 +109,18 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
                                               reply_to_message_id=input_reply_message_id)
 
         dict_event = {'id': msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
+        LOGS.info(f"{len(text_message)}")
+        LOGS.info(f"{len(ascii(text_message))}")
+        LOGS.info(f"{repr(text_message)}")
 
-        LOGS.info(f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text},")
+        LOGS.info(f"{len(msgsent_.text)}")
+        LOGS.info(f"{len(ascii(msgsent_.text))}")
+        LOGS.info(f"{repr(msgsent_.text)}")
+
+        LOGS.info(f"{text_message}")
+        LOGS.info(f"{ascii(text_message)}")
+        LOGS.info(
+            f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text}, entities: {msgsent_.entities}")
         await collezione_fw.insert_one(dict_event)
 
 
@@ -183,12 +193,49 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
 #     text_message = "something"
 #   return text_message
 
+def check_entities(entities: Optional[list[MessageEntity]], prefix_length: int) -> Optional[list[MessageEntity]]:
+    LOGS.info(entities)
+    if entities:
+        if prefix_length != -1:
+
+            for x in entities:
+
+                x.offset += prefix_length
+
+    LOGS.info(entities)
+    return entities
+
+
+def check_for_symbols(text_message: str) -> int:
+    input_symbols = Symb_Config.extractor.extract(text_message.upper())
+    if input_symbols:
+        LOGS.info(f"SYMBOLS FOUND IN THE MESSAGE (if any): {input_symbols}")
+        # if any(elemen in Symb_Config.SYMB_TO_EXCLUDE for elemen in input_symbols) :
+        # sets are faster
+        # Its going to look through every item in the smaller set and perform a 0(1) lookup to check if its in the other set. So O(1 * len(s)) where s in the shorter of the two
+        # Meanwhite, [x in y_list for x in x_list] is going to do (up to) len(x_list) checks with complexity O(len(y_list))
+        # Hence O(len(x_list) * len(y_list)). Several orders of complexity slower
+
+        if intersection := set(input_symbols).intersection(Symb_Config.SYMB_TO_EXCLUDE):
+            LOGS.warning(
+                f"MATCH WAS FOUND BUT SYMBOL {intersection} was discarded. Message not forwarded")
+            return False
+
+    if word_found := set(text_message.upper().split()) & BlacklistWords.WORDS_TO_EXCLUDE_SET:
+        LOGS.warning(
+            f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
+        return False
+    return True
+
 
 def add_prefix_suffix(val_ret: int, text_message: str) -> tuple:
     if val_ret in range(1, 9):
         key = f"PATTERN{val_ret}"
+
         prefix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"]
+
         suffix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
+        LOGS.info(f"{ascii(prefix)}")
         return prefix + text_message + suffix, len(prefix)
     return text_message, -1
 
@@ -240,22 +287,24 @@ def remove_optional_info(matches: re.Match, pattern) -> tuple:
 
 
 def remove_message_if_opt(matches: re.Match, pattern) -> bool:
+    LOGS.info(pattern)
     if matches:
         if matches.lastgroup == "optional_info":
-            if [x for x in
-                Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][pattern]["remove_string"]["optional_info"]
-                if x in matches.group('optional_info')]:
-                return True
+            if Symb_Config.DICTIONARY_VALS_PREF_SUFFIX.get("glossary").get(pattern):
+                if Symb_Config.DICTIONARY_VALS_PREF_SUFFIX.get("glossary").get(pattern).get("remove_string"):
+                    if [x for x in
+                        Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][pattern]["remove_string"]["optional_info"]
+                        if x in matches.group('optional_info')]:
+                        return True
+                else:
+                    LOGS.error("CHECK YOUR PREF_SUFFIX_MSG, NO REMOVE_STRING")
     return False
 
 
-@register(outgoing=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
+@register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID, edited=True)
 async def handler(event: pyrogram.types.Message):
     LOGS.info(f"----EDITED MESSAGE EVENT CAPTURED BLOCK START----")
     # LOGS.info(event)
-    pickled_obj = pickle.dumps(event)
-    await collezione_get.update_one(filter={"id": event.id}, update={'$set': {'data': pickled_obj}},
-                                    upsert=True)
     try:
 
         LOGS.info(f"PRINTING EDITED MESSAGE {event.text}")
@@ -270,10 +319,7 @@ async def handler(event: pyrogram.types.Message):
                 await collezione_fw.delete_one(deleted_message_from_end_chat)
                 await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[pickled_end_document.id],
                                           revoke=True)
-                LOGS.info(
-                    f"MATCH EDITED MESSAGE BUT CONTAINED A PATTERN TO REMOVE, SO MESSAGE WAS EXCLUDED AND MESSAGE WAS DELETED")
-                return
-            LOGS.error("MATCHED BUT NO MESSAGE WAS FOUND IN THE END CHAT DATABASE")
+            LOGS.info(f"MATCH EDITED MESSAGE BUT CONTAINED A PATTERN TO REMOVE, SO MESSAGE WAS EXCLUDED")
         elif return_tuple_match != (-1, None):
             LOGS.info(f"MATCH EDITED MESSAGE")
             # collezione_fw is a mongodb collection which holds all the forwarded messages from the start to end channel, it has got a key-value pair to hold the start channel message id
@@ -290,32 +336,20 @@ async def handler(event: pyrogram.types.Message):
                     f"EDITING MSG {unpickled_obj.id} FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
 
                 # here i try to edit the message on the end channel by the end channel id
+                if not check_for_symbols(event.text):
+                    return
                 text_message, prefix_length = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
-                if event.entities:
-                    if len(unpickled_obj.text) != len(event.text):
-                        if prefix_length != -1:
-                            for x in event.entities:
-                                x.offset += prefix_length + 1
 
-                LOGS.info(f"TEXT EDITED WITH SUFFIX AND PREFIX:\n{text_message}")
-                unpickled_obj=await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
-                                            message_id=unpickled_obj.id, entities=event.entities,
-                                            parse_mode=ParseMode.DEFAULT)
-                pickled_obj_edited = pickle.dumps(event)
+                event.entities = check_entities(event.entities, prefix_length)
 
-                await collezione_fw.update_one(filter={"id": unpickled_obj.id},
-                                               update={'$set': {'data': pickled_obj_edited}},
-                                               upsert=True)
-
-
+                msgsent_ = await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
+                                                       message_id=unpickled_obj.id, entities=event.entities)
+                LOGS.info(f"TEXT EDITED WITH SUFFIX AND PREFIX:\n{msgsent_.text} and entities {msgsent_.entities}")
             else:
                 LOGS.info(
                     f"NO MESSAGE WAS FOUND IN THE COLLECTION  TO EDIT BUT IT MATCHED THE PATTERN, SENDING THE MESSAGE")
                 await send_msg_if_pattern_match(text_message=return_tuple_match[1],
                                                 messageid=event.id, entities=event.entities)
-                #insertion to db is done internally in the send_msg_if_pattern_match function
-                #no need to do it here.
-
         LOGS.info(f"----EDITED MESSAGE BLOCK FINISH----")
     except Exception as e:
         LOGS.error(f"ERROR {e}")
@@ -330,29 +364,26 @@ async def handler(event: pyrogram.types.List):
 
     LOGS.info(
         f"{[x.id for x in event]} DELETED MESSAGE FROM CHAT NAME {Config.CHANNEL_NAME_CLIENT}")
-    try:
-        for count, message in enumerate(event):
-            deleted_id = message.id
-            deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
-            if deleted_message_from_start_chat is not None:
-                # get the data from it
-                data = deleted_message_from_start_chat['data']
-                # unpickle the data
-                unpickled_obj = pickle.loads(data)
-                LOGS.info(f"Message #{count + 1} that got deleted {unpickled_obj.text}")
-                if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
-                    data_ = the_Dict['data']
-                    unpickled_obj_ = pickle.loads(data_)
-                    await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[unpickled_obj_.id], revoke=True)
-                    await collezione_fw.delete_one(the_Dict)
-                await collezione_get.delete_one(deleted_message_from_start_chat)
-            else:
-                LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
-        LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
-    except Exception as e:
-        LOGS.error(f"ERROR {e}")
-        LOGS.info(f"----EXCEPTION THROWN, DELETED MESSAGE BLOCK FINISH----")
 
+    for count, message in enumerate(event):
+        deleted_id = message.id
+        deleted_message_from_start_chat = await collezione_get.find_one({'id': deleted_id})
+        if deleted_message_from_start_chat is not None:
+            # get the data from it
+            data = deleted_message_from_start_chat['data']
+            # unpickle the data
+            unpickled_obj = pickle.loads(data)
+            LOGS.info(f"Message #{count + 1} that got deleted {unpickled_obj.text}")
+            if (the_Dict := await collezione_fw.find_one({Config.SUFFIX_KEY_ID_DBMS: deleted_id})) is not None:
+                data_ = the_Dict['data']
+                unpickled_obj_ = pickle.loads(data_)
+                await bot.delete_messages(chat_id=Config.BOT_CHANNEL_ID, message_ids=[unpickled_obj_.id], revoke=True)
+                await collezione_fw.delete_one(the_Dict)
+            await collezione_get.delete_one(deleted_message_from_start_chat)
+        else:
+            LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
+
+    LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
 
 @pyrogram.Client.on_raw_update()
