@@ -76,6 +76,7 @@ async def handler(event: pyrogram.types.Message):
     matches= matches[0].splitlines()
     #removing '' strings from list
     matches=[x for x in matches if len(x)>0 and x!='']
+
     if len(matches)>0:
         LOGS.info(f"Opening file {BlacklistWords.path} to save input_words: {matches}")
         try:
@@ -90,7 +91,7 @@ async def handler(event: pyrogram.types.Message):
         else:
             list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
             await bot.send_message(text=f"<b>•Old blacklist:</b>\n<code>{list_to_string} </code>", chat_id=event.chat.id)
-            BlacklistWords.WORDS_TO_EXCLUDE = retrieve_lines_from_file(
+            BlacklistWords.WORDS_TO_EXCLUDE = await retrieve_lines_from_file(
                 os.path.join(const_dirs_class.CURR_DIR, BlacklistWords.path))
             BlacklistWords.WORDS_TO_EXCLUDE_SET = set(BlacklistWords.WORDS_TO_EXCLUDE)
             list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
@@ -98,6 +99,10 @@ async def handler(event: pyrogram.types.Message):
             await bot.send_message(text=f"<b>•New Blacklist:</b>\n<code>{list_to_string}</code>",
                                    chat_id=event.chat.id, reply_to_message_id=event.id)
     else:
+        list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
+        await bot.send_message(text=f"<b>•Old blacklist:</b>\n<code>{list_to_string} </code>", chat_id=event.chat.id)
+        BlacklistWords.WORDS_TO_EXCLUDE = None
+        BlacklistWords.WORDS_TO_EXCLUDE_SET = None
         await bot.send_message(text="<b>•Current Blacklist:</b>\n`None`", chat_id=event.chat.id, reply_to_message_id=event.id)
     LOGS.info(f"---END CHANGE blacklist---")
 

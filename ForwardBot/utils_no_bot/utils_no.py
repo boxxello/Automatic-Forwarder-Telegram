@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 
@@ -24,7 +25,6 @@ def retrieve_lines_from_file(path: str) -> list:
 def retrieve_pref_suffix_msg(path: str) -> dict:
     with open(path, encoding='utf-8') as inputfile:
         dict_to_return = json.load(inputfile)
-
     return dict_to_return
 
 

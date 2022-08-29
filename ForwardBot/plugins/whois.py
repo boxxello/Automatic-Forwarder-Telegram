@@ -55,7 +55,7 @@ async def who_is( message : pyrogram.types.Message):
             status = reply_user.status
             isbot = reply_user.is_bot
             last_seen = LastSeen(isbot, status)
-            sudo = SudoCheck(user_id)
+            sudo = await SudoCheck(user_id)
             chats = len(await bot.get_common_chats(user_id))
 
             caption = 'WhoisResult'+'\n'+'First Name: `'+first_name+'`'+'\n'+'LastName: `'\
@@ -96,7 +96,7 @@ def LastSeen(bot, status):
     elif status == enums.UserStatus.LONG_AGO:
         return 'statusLong'
 
-def SudoCheck(user_id):
+async def SudoCheck(user_id):
     if user_id in ForwardBot.Config.SUDO_USERS_INT:
         return 'sudoCheck'
 CMD_HELP.update({

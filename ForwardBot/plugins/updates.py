@@ -16,5 +16,5 @@ async def send_ping_message(chat_id=Config.PING_CHANNEL_ID):
     except BaseException as e:
         ForwardBot.LOGS.info(e)
 
-SCHEDULER.add_job(send_ping_message, 'interval', minutes=30)
+SCHEDULER.add_job(send_ping_message, 'interval', minutes=60)
 SCHEDULER.start()

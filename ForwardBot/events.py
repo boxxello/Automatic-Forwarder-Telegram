@@ -59,7 +59,7 @@ def register(**args):
                     if not disable_notify:
                         await edit(message, f'`"groupUsage"`')
                     message.continue_propagation()
-                if admin and not is_admin(message):
+                if admin and not await is_admin(message):
                     if not disable_notify:
                         await edit(message, f'`Non puoi usare questo comando`')
                     message.continue_propagation()

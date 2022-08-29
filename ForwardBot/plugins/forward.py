@@ -14,17 +14,6 @@ from ForwardBot.events import register, message_deleted
 
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
-#     message = """GOLD SELL 1745.10
-# SL 1754.00
-# TP Open
-# **SWING TRADE**"""
-#     result = await bot.send_message(chat_id=Config.BOT_CHANNEL_ID,
-#                                     text=f"{Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']+message+    Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['suffix']}")
-#     if result.text:
-#         print(ascii(result.text))
-#         print(len(result.text))
-#         print(ascii(Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']))
-#         print(len(Symb_Config.DICTIONARY_VALS_PREF_SUFFIX['glossary']['PATTERN1']['prefix']))
 
     pickled_obj = pickle.dumps(event)
     # LOGS.info(event)
@@ -83,7 +72,7 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
         text_message = re.sub(Config.PATTERNURL, "", text_message, flags=re.IGNORECASE)
         LOGS.info(f"A link was removed, actual msg {text_message}")
 
-    val_ret, text_message = check_for_pattern_match(text_message)
+    val_ret, text_message = await check_for_pattern_match(text_message)
     if val_ret != -1 and text_message == None:
         LOGS.info(f"PATTERN MATCH FOUND BUT CONTAINED PATTERN TO EXCLUDE, message discarded")
         return
@@ -93,14 +82,14 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
         # for matchNum, match in enumerate(matches, start=1):
         #     my_dict = match.capturesdict()
         # LOGS.info(my_dict)
-        if not check_for_symbols(text_message):
+        if not await check_for_symbols(text_message):
             return
         # walrus operator on add_prefix_suffix assigning it to a value
 
-        text_message, prefix_length = add_prefix_suffix(val_ret, text_message)
+        text_message, prefix_length = await add_prefix_suffix(val_ret, text_message)
         LOGS.info(f"PREFIX LENGTH: {prefix_length}")
 
-        entities = check_entities(entities, prefix_length)
+        entities = await check_entities(entities, prefix_length)
 
         if not is_reply:
             msgsent_ = await bot.send_message(text=text_message, entities=entities, chat_id=f'{Config.BOT_CHANNEL_ID}')
@@ -109,18 +98,18 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
                                               reply_to_message_id=input_reply_message_id)
 
         dict_event = {'id': msgsent_.id, 'data': pickle.dumps(msgsent_), Config.SUFFIX_KEY_ID_DBMS: messageid}
-        LOGS.info(f"{len(text_message)}")
-        LOGS.info(f"{len(ascii(text_message))}")
-        LOGS.info(f"{repr(text_message)}")
-
-        LOGS.info(f"{len(msgsent_.text)}")
-        LOGS.info(f"{len(ascii(msgsent_.text))}")
-        LOGS.info(f"{repr(msgsent_.text)}")
-
-        LOGS.info(f"{text_message}")
-        LOGS.info(f"{ascii(text_message)}")
+        # LOGS.info(f"{len(text_message)}")
+        # LOGS.info(f"{len(ascii(text_message))}")
+        # LOGS.info(f"{repr(text_message)}")
+        #
+        # LOGS.info(f"{len(msgsent_.text)}")
+        # LOGS.info(f"{len(ascii(msgsent_.text))}")
+        # LOGS.info(f"{repr(msgsent_.text)}")
+        #
+        # LOGS.info(f"{text_message}")
+        # LOGS.info(f"{ascii(text_message)}")
         LOGS.info(
-            f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text}, entities: {msgsent_.entities}")
+            f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text}")
         await collezione_fw.insert_one(dict_event)
 
 
@@ -193,7 +182,7 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
 #     text_message = "something"
 #   return text_message
 
-def check_entities(entities: Optional[list[MessageEntity]], prefix_length: int) -> Optional[list[MessageEntity]]:
+async def check_entities(entities: Optional[list[MessageEntity]], prefix_length: int) -> Optional[list[MessageEntity]]:
     LOGS.info(entities)
     if entities:
         if prefix_length != -1:
@@ -206,7 +195,7 @@ def check_entities(entities: Optional[list[MessageEntity]], prefix_length: int) 
     return entities
 
 
-def check_for_symbols(text_message: str) -> int:
+async def check_for_symbols(text_message: str) -> int:
     input_symbols = Symb_Config.extractor.extract(text_message.upper())
     if input_symbols:
         LOGS.info(f"SYMBOLS FOUND IN THE MESSAGE (if any): {input_symbols}")
@@ -220,33 +209,30 @@ def check_for_symbols(text_message: str) -> int:
             LOGS.warning(
                 f"MATCH WAS FOUND BUT SYMBOL {intersection} was discarded. Message not forwarded")
             return False
-
-    if word_found := set(text_message.upper().split()) & BlacklistWords.WORDS_TO_EXCLUDE_SET:
-        LOGS.warning(
-            f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
-        return False
+    if BlacklistWords.WORDS_TO_EXCLUDE_SET:
+        if word_found := set(text_message.upper().split()) & BlacklistWords.WORDS_TO_EXCLUDE_SET:
+            LOGS.warning(
+                f"MATCH WAS FOUND BUT WORD {word_found} was discarded. Message not forwarded")
+            return False
     return True
 
 
-def add_prefix_suffix(val_ret: int, text_message: str) -> tuple:
+async def add_prefix_suffix(val_ret: int, text_message: str) -> tuple:
     if val_ret in range(1, 9):
         key = f"PATTERN{val_ret}"
-
         prefix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["prefix"]
-
         suffix = Symb_Config.DICTIONARY_VALS_PREF_SUFFIX["glossary"][key]["suffix"]
-        LOGS.info(f"{ascii(prefix)}")
         return prefix + text_message + suffix, len(prefix)
     return text_message, -1
 
 
-def check_for_pattern_match(event_text: str) -> tuple:
+async def check_for_pattern_match(event_text: str) -> tuple:
     if re.search(Config.PATTERNURL, event_text, flags=re.IGNORECASE):
         event_text = re.sub(Config.PATTERNURL, "", event_text, flags=re.IGNORECASE)
     elif matches := (re.match(Config.PATTERN1, event_text, flags=(re.IGNORECASE | re.UNICODE | re.MULTILINE))):
         return 1, event_text
     elif matches := (re.match(Config.PATTERN2, event_text, flags=re.IGNORECASE)):
-        if remove_message_if_opt(matches, "PATTERN2"):
+        if await remove_message_if_opt(matches, "PATTERN2"):
             return 2, None
         else:
             return 2, event_text
@@ -259,7 +245,7 @@ def check_for_pattern_match(event_text: str) -> tuple:
     elif matches := (re.match(Config.PATTERN6, event_text, flags=re.IGNORECASE | re.MULTILINE)):
         return 6, event_text
     elif matches := (re.match(Config.PATTERN7, event_text, flags=re.IGNORECASE | re.MULTILINE)):
-        if remove_message_if_opt(matches, "PATTERN7"):
+        if await remove_message_if_opt(matches, "PATTERN7"):
             return 7, None
         else:
             return 7, event_text
@@ -273,7 +259,7 @@ def check_for_pattern_match(event_text: str) -> tuple:
     return -1, event_text
 
 
-def remove_optional_info(matches: re.Match, pattern) -> tuple:
+async def remove_optional_info(matches: re.Match, pattern) -> tuple:
     if matches:
         if matches.lastgroup == "optional_info":
             if [x for x in
@@ -286,7 +272,7 @@ def remove_optional_info(matches: re.Match, pattern) -> tuple:
     return False, ""
 
 
-def remove_message_if_opt(matches: re.Match, pattern) -> bool:
+async def remove_message_if_opt(matches: re.Match, pattern) -> bool:
     LOGS.info(pattern)
     if matches:
         if matches.lastgroup == "optional_info":
@@ -308,7 +294,7 @@ async def handler(event: pyrogram.types.Message):
     try:
 
         LOGS.info(f"PRINTING EDITED MESSAGE {event.text}")
-        return_tuple_match = check_for_pattern_match(event.text)
+        return_tuple_match = await check_for_pattern_match(event.text)
         if return_tuple_match[1] == None and return_tuple_match[0] != -1:
             deleted_message_from_end_chat = await collezione_fw.find_one(
                 {BotConfig.Config.SUFFIX_KEY_ID_DBMS: event.id})
@@ -336,11 +322,11 @@ async def handler(event: pyrogram.types.Message):
                     f"EDITING MSG {unpickled_obj.id} FROM {Config.CHANNEL_NAME_CLIENT} to {Config.CHANNEL_NAME_BOT}")
 
                 # here i try to edit the message on the end channel by the end channel id
-                if not check_for_symbols(event.text):
+                if not await check_for_symbols(event.text):
                     return
-                text_message, prefix_length = add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
+                text_message, prefix_length = await add_prefix_suffix(return_tuple_match[0], return_tuple_match[1])
 
-                event.entities = check_entities(event.entities, prefix_length)
+                event.entities = await check_entities(event.entities, prefix_length)
 
                 msgsent_ = await bot.edit_message_text(text=text_message, chat_id=Config.BOT_CHANNEL_ID,
                                                        message_id=unpickled_obj.id, entities=event.entities)
