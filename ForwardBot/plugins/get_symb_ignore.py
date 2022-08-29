@@ -36,7 +36,7 @@ async def handler(event: pyrogram.types.Message):
         await bot.send_message(text="<b>•Current Symbols:</b>\n`None`", chat_id=event.chat.id)
     else:
         await bot.send_message(text=f"<b>•Current Symbols:</b>\n`{list_to_string}`", chat_id=event.chat.id)
-    input_symbols = Symb_Config.extractor.extract(event.text)
+    input_symbols = Symb_Config.extractor.extract(event.text.upper())
     LOGS.info(f"Opening file {Symb_Config.FILE_SYMB_EXCLUDE} to save input_symbols: {input_symbols}")
     try:
         with open(Symb_Config.FILE_SYMB_EXCLUDE, "w") as f:
@@ -57,10 +57,11 @@ async def handler(event: pyrogram.types.Message):
         LOGS.error(f"Unexpected error: {sys.exc_info()[0]}")
 
 
-@register(incoming=True, pattern=r"^\.blacklist(?: |$)(.*)")
+@register(incoming=True, pattern=r"^\.getblacklist(?: |$)(.*)")
 async def handler(event: pyrogram.types.Message):
     await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
+    LOGS.info(f"Blacklist words to exclude: {BlacklistWords.WORDS_TO_EXCLUDE}")
     await bot.send_message(text=f"<b>•Blacklist:</b>\n<code>{list_to_string} </code>", chat_id=event.chat.id, reply_to_message_id=event.id)
 
 
@@ -72,15 +73,16 @@ async def handler(event: pyrogram.types.Message):
 
     await bot.send_chat_action(chat_id=event.chat.id, action=ChatAction.TYPING)
     matches = re.findall(pattern_blacklist, event.text, re.IGNORECASE|re.MULTILINE|re.DOTALL)
-    matches= matches[0].split(' ')
+    matches= matches[0].splitlines()
     #removing '' strings from list
-    matches=[x for x in matches if x]
+    matches=[x for x in matches if len(x)>0 and x!='']
+
     if len(matches)>0:
         LOGS.info(f"Opening file {BlacklistWords.path} to save input_words: {matches}")
         try:
             with open(BlacklistWords.path, "w") as f:
                 for match in matches:
-                    f.write(f"{match}\n")
+                    f.write(f"{match.upper()}\n")
 
         except IOError as e:
             LOGS.error(f"I/O error({e.errno}): {e.strerror}")
@@ -89,13 +91,18 @@ async def handler(event: pyrogram.types.Message):
         else:
             list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
             await bot.send_message(text=f"<b>•Old blacklist:</b>\n<code>{list_to_string} </code>", chat_id=event.chat.id)
-            BlacklistWords.WORDS_TO_EXCLUDE = retrieve_lines_from_file(
+            BlacklistWords.WORDS_TO_EXCLUDE = await retrieve_lines_from_file(
                 os.path.join(const_dirs_class.CURR_DIR, BlacklistWords.path))
+            BlacklistWords.WORDS_TO_EXCLUDE_SET = set(BlacklistWords.WORDS_TO_EXCLUDE)
             list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
 
-            await bot.send_message(text=f"<b>•New Blacklist:</b>\n <code>{list_to_string}</code>",
+            await bot.send_message(text=f"<b>•New Blacklist:</b>\n<code>{list_to_string}</code>",
                                    chat_id=event.chat.id, reply_to_message_id=event.id)
     else:
+        list_to_string = '\n'.join(BlacklistWords.WORDS_TO_EXCLUDE)
+        await bot.send_message(text=f"<b>•Old blacklist:</b>\n<code>{list_to_string} </code>", chat_id=event.chat.id)
+        BlacklistWords.WORDS_TO_EXCLUDE = None
+        BlacklistWords.WORDS_TO_EXCLUDE_SET = None
         await bot.send_message(text="<b>•Current Blacklist:</b>\n`None`", chat_id=event.chat.id, reply_to_message_id=event.id)
     LOGS.info(f"---END CHANGE blacklist---")
 
@@ -111,8 +118,8 @@ CMD_HELP.update({
                "\n↳ : Updates current symbols to ignore"
                "\n\n⚡𝘾𝙈𝘿⚡: `.getsymbols`"
                "\n↳ : Gets the current symbols that are being ignored"
-               "\n\n⚡𝘾𝙈𝘿⚡: `.blacklist `"
+               "\n\n⚡𝘾𝙈𝘿⚡: `.getblacklist `"
                "\n↳ : Gets the current words that are being ignored"
                "\n\n⚡𝘾𝙈𝘿⚡: `.blacklistignore <any_word>`"
-               "\n↳ : Ignore an amount of msgs from the input_chat"
+               "\n↳ : Ignore specific words"
 })

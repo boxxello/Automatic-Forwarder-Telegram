@@ -1,7 +1,7 @@
 {
   "glossary": {
     "PATTERN1": {
-      "prefix": "NUOVA IDEA DI TRADING \uD83D\uDCC8 \n\n",
+      "prefix": "NUOVA IDEA DI TRADING \n\n",
       "suffix": "\n\n⚠️ Questo messaggio non costituisce un consiglio di investimento ed è esclusivamente a scopo didattico ⚠️️\n"
     },
     "PATTERN2": {
@@ -31,16 +31,17 @@
     },
     "PATTERN7": {
       "prefix": "",
-      "suffix": ""
-    },
-    "PATTERN8": {
-      "prefix": "",
       "suffix": "",
       "remove_string": {
         "optional_info": [
           "copier user"
         ]
       }
+    },
+    "PATTERN8": {
+      "prefix": "",
+      "suffix": ""
+
     }
   }
 }

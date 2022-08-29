@@ -48,8 +48,8 @@ class Config(object):
     # https://regex101.com/r/W4Sc3B/1 no emoji /backup
     # https://regex101.com/r/G3RBXI/1 con emoji dentro+opt value
     PATTERNURL = r"(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?"
-    PATTERN2 = r"^\s*(?P<symbol>([A-Z]{6}\s*[\/\\\|-]?\s*GOLD)|(([A-Z]{3}\s*[\/I\\\ |-]?\s*[(A-Z)|(0-9)]{3})|(GOLD)))?\s*(\(?(Intra-Day)?\s*\d*[A-Z|a-z]{2}\s*ENTRY\)?)?\s*(((?P<instance>RUNNING|CLOSED|CLOSE)((?:\s*)With)?\s*(?P<pips_num>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?))|\s*((?:\s*)With)?\s*(?P<pips_num2>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?)(\s*(?P<instance2>RUNNING|CLOSED|CLOSE)))\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?(?P<close>CLOSE)?\s*(?P<where>TO|AT|WITH)?\s*(?P<pips_num3>-\s*\d+|\d+\+|\d+|\+\d+)?\s*(?:(PIPS)?)(?P<optional_info>.*)?$"
-    #
+    PATTERN2 = r"^\s*(?P<symbol>([A-Z]{6}\s*[\/\\\|-]?\s*GOLD)|(([A-Z]{3}\s*[\/I\\\ |-]?\s*[(A-Z)|(0-9)]{3})|(GOLD)))?\s*(\(?((Intra-Day)|(Swing[-| ]Trade))?\s*(\d*[A-Z|a-z]{2})?\s*(ENTRY)?\)?)?\s*(((?P<instance>RUNNING|CLOSED|CLOSE)((?:\s*)With)?\s*(?P<pips_num>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?))|\s*((?:\s*)With)?\s*(?P<pips_num2>-\s*\d+|\d+\+|\d+|\+\d+)?\s*((PIPS)?)(\s*(?P<instance2>RUNNING|CLOSED|CLOSE)))\s*((✅)?)+\s*(\d+:((\d+\.\d+|\d+)?\+?))?\s*(RRR\s*(🔥?)*)?(?P<close>CLOSE)?\s*(?P<where>TO|AT|WITH)?\s*(?P<pips_num3>-\s*\d+|\d+\+|\d+|\+\d+)?\s*(?:(PIPS)?)(?P<optional_info>.*)?$"
+    #https://regex101.com/r/8iEnv1/1
 
     # https://regex101.com/r/SM2i0S/1 backup
 

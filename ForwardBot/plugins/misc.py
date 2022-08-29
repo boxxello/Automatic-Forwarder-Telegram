@@ -24,7 +24,7 @@ _admin_status_list = [
     enums.ChatMemberStatus.OWNER,
     enums.ChatMemberStatus.ADMINISTRATOR,
 ]
-def reply(
+async def reply(
     message,
     text,
     preview=True,
@@ -45,7 +45,7 @@ def reply(
         pass
 
 
-def extract_args(message, markdown=True):
+async def extract_args(message, markdown=True):
     if not (message.text or message.caption):
         return ''
 
@@ -60,7 +60,7 @@ def extract_args(message, markdown=True):
     return text
 
 
-def extract_args_arr(message, markdown=True):
+async def extract_args_arr(message, markdown=True):
     return extract_args(message, markdown).split()
 
 
@@ -120,18 +120,18 @@ async def download_media_wc(data, file_name=None, progress=None, sticker_orig=Fa
     return await download_media(ForwardBot.bot, data, file_name, progress, sticker_orig)
 
 
-def get_me():
+async def get_me():
     return ForwardBot.bot.get_me()
 
 
-def forward(message, chat_id):
+async def forward(message, chat_id):
     try:
         return message.forward(chat_id or 'me')
     except Exception as e:
         raise e
 
 
-def get_messages(chat_id, msg_ids=None, client=ForwardBot.bot):
+async def get_messages(chat_id, msg_ids=None, client=ForwardBot.bot):
     try:
         ret = client.get_messages(chat_id=(chat_id or 'me'), message_ids=msg_ids)
         return [ret] if ret and isinstance(ret, Message) else ret
@@ -143,7 +143,7 @@ def get_messages(chat_id, msg_ids=None, client=ForwardBot.bot):
 
 
 
-def get_cmd(message):
+async def get_cmd(message):
     text = message.text or message.caption
     if text:
         text = text.strip()
@@ -151,7 +151,7 @@ def get_cmd(message):
     return ''
 
 
-def parse_cmd(text):
+async def parse_cmd(text):
     cmd = sub(r'\s+', ' ', text)
     cmd = cmd.split()[0]
     cmd = cmd.split(_parsed_prefix)[-1] if ForwardBot.Config.BOT_PREFIX else cmd[1:]
@@ -160,7 +160,7 @@ def parse_cmd(text):
 
 
 
-def is_admin(message):
+async def is_admin(message):
     if not message.chat.type in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
         return True
 
@@ -168,7 +168,7 @@ def is_admin(message):
     return user.status in _admin_status_list
 
 
-def is_admin_myself(chat):
+async def is_admin_myself(chat):
     if not chat.type in [enums.ChatType.SUPERGROUP, enums.ChatType.GROUP]:
         return True
 
@@ -191,7 +191,7 @@ def get_duration(media):
     return None
 
 
-def __status_out__(cmd, encoding='utf-8'):
+async def __status_out__(cmd, encoding='utf-8'):
     try:
         output = check_output(
             cmd, shell=True, text=True, stderr=STDOUT, encoding=encoding

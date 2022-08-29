@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 
@@ -61,16 +62,17 @@ def create_dict_pref_suffix_msg(path: str) -> dict:
             },
             "PATTERN7": {
                 "prefix": "",
-                "suffix": ""
-            },
-            "PATTERN8": {
-                "prefix": "",
                 "suffix": "",
                 "remove_string": {
                     "optional_info": [
                         "copier user"
                     ]
                 }
+            },
+            "PATTERN8": {
+                "prefix": "",
+                "suffix": "",
+
             }
         }
     }
