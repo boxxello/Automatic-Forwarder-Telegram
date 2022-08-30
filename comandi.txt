@@ -1,0 +1,2 @@
+docker build . -t tg_fw_bot_pyro --no-cache
+sudo docker-compose up -d
