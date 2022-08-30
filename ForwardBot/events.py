@@ -92,7 +92,7 @@ def register(**args):
             bot.add_handler(EditedMessageHandler(wrap, filter))
         else:
             if pattern:
-                bot.add_handler(MessageHandler(wrap, filter), group=15)
+                bot.add_handler(MessageHandler(wrap, filter), group=-1)
             else:
                 bot.add_handler(MessageHandler(wrap, filter))
 

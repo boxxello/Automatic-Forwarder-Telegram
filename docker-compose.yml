@@ -21,4 +21,4 @@ services:
         - MONGO_INITDB_ROOT_USERNAME=root
         - MONGO_INITDB_ROOT_PASSWORD=pass
       ports:
-        - '27018:27018'
+        - '27017:27017'
