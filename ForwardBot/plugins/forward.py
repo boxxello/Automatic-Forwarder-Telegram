@@ -3,12 +3,17 @@ import re
 from typing import Optional
 
 import pyrogram
-
+from pyrogram import enums
+from pyrogram.enums import ParseMode
+from pyrogram.raw.functions.updates import GetState, GetDifference
 from pyrogram.types import MessageEntity
 
-from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw,  BotConfig
+from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_dict, BotConfig
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
+@bot.on_message(filters=((filters.me | filters.incoming) & filters.chat(Config.CLIENT_CHANNEL_ID)), group=1)
+async def handler(bot, event: pyrogram.types.Message):
+    LOGS.info(event)
 
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
@@ -370,17 +375,17 @@ async def handler(event: pyrogram.types.List):
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
 
 
-# @pyrogram.Client.on_raw_update()
-# async def handler(event):
-#     LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK START----")
-#     if isinstance(event, pyrogram.raw.types.UpdatesTooLong):
-#         # handle the update by calling GetDifference
-#         getstate = await bot.invoke(
-#             GetState()
-#         )
-#
-#         test=await bot.invoke(
-#             GetDifference(pts=getstate.pts, date=getstate.date, qts=getstate.qts))
-#         LOGS.info(f"pts: {getstate.pts}, date: {getstate.date}, qts: {getstate.qts}")
-#
-#         LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK END----")
+@pyrogram.Client.on_raw_update()
+async def handler(event):
+    LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK START----")
+    if isinstance(event, pyrogram.raw.types.UpdatesTooLong):
+        # handle the update by calling GetDifference
+        getstate = await bot.invoke(
+            GetState()
+        )
+
+        await bot.invoke(
+            GetDifference(pts=getstate.pts, date=getstate.date, qts=getstate.qts))
+        LOGS.info(f"pts: {getstate.pts}, date: {getstate.date}, qts: {getstate.qts}")
+
+        LOGS.info(f"----RAW UPDATE EVENT CAPTURED BLOCK END----")

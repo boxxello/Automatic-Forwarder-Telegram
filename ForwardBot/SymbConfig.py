@@ -21,7 +21,7 @@ class Symb_Config(object):
         LOGS.error(f"Didn't find file {path}, check .env file")
         exit(-11)
     FILE_SYMB_PREF_SUFFIX=environ.get("FILE_PREF_SUFFIX_MSG", "pref_suffix_msg.json")
-    #create_dict_pref_suffix_msg(os.path.join(const_dirs_class.CURR_DIR,FILE_SYMB_PREF_SUFFIX))
+    #await create_dict_pref_suffix_msg(os.path.join(const_dirs_class.CURR_DIR,FILE_SYMB_PREF_SUFFIX))
     DICTIONARY_VALS_PREF_SUFFIX=retrieve_pref_suffix_msg(os.path.join(const_dirs_class.CURR_DIR,FILE_SYMB_PREF_SUFFIX))
     LOGS.info(DICTIONARY_VALS_PREF_SUFFIX)
     extractor=reticker.TickerExtractor()

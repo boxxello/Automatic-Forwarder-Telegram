@@ -28,7 +28,7 @@ def retrieve_pref_suffix_msg(path: str) -> dict:
     return dict_to_return
 
 
-def create_dict_pref_suffix_msg(path: str) -> dict:
+async def create_dict_pref_suffix_msg(path: str) -> dict:
     dict_to_return = {
         "glossary": {
             "PATTERN1": {

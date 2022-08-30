@@ -1,7 +1,7 @@
 import asyncio
-import os
+
 import re
-import sys
+
 from time import strftime, gmtime
 from traceback import format_exc
 
@@ -9,10 +9,10 @@ import pyrogram
 from pyrogram import filters, enums
 from pyrogram.errors import FloodWait
 from pyrogram.handlers import EditedMessageHandler, MessageHandler, DeletedMessagesHandler
-from pyrogram.raw.types import MessageActionContactSignUp
+
 
 from ForwardBot import bot, Config, LOGS
-from ForwardBot.plugins.misc import edit, is_admin, _parsed_prefix
+from ForwardBot.plugins.misc import  _parsed_prefix
 
 
 
@@ -20,23 +20,18 @@ from ForwardBot.plugins.misc import edit, is_admin, _parsed_prefix
 
 def register(**args):
     pattern = args.get('pattern', None)
-    outgoing = args.get('outgoing', True)
+    outgoing = args.get('outgoing', False)
     incoming = args.get('incoming', False)
     edited = args.get('edited', False)
-    disable_notify = args.get('disable_notify', False)
-    compat = args.get('compat', True)
-    private = args.get('private', True)
     chat_id=args.get('chat_id', None)
 
-    service = args.get('service', False)
-    admin = args.get('admin', False)
     if pattern and '.' in pattern[:2]:
         args['pattern'] = pattern = pattern.replace('.', _parsed_prefix, 1)
     if pattern and pattern[-1:] != '$':
         args['pattern'] = pattern = f'{pattern}(?: |$)'
 
     def msg_decorator(func):
-        async def wrap(client, message):
+        async def wrap(bot, message: pyrogram.types.Message):
             try:
                 if not message.chat.type in [
                     enums.ChatType.CHANNEL,
@@ -45,29 +40,8 @@ def register(**args):
                     if str(message.from_user.id) not in Config.SUDO_USERS_INT:
                         LOGS.info(f"{str(message.from_user.id)} tried to send a command, but he's not a sudo user")
                         await bot.send_message(chat_id=message.chat.id, text="You are not allowed to use this command.")
-                        return
-                if message.service and not service:
-                    return
-                if message.service and isinstance(message.action, MessageActionContactSignUp):
-                    return
-                if message.chat.type == enums.ChatType.BOT:
-                    message.continue_propagation()
-                if not private and message.chat.type in [
-                    enums.ChatType.PRIVATE,
-                    enums.ChatType.BOT,
-                ]:
-                    if not disable_notify:
-                        await edit(message, f'`"groupUsage"`')
-                    message.continue_propagation()
-                if admin and not await is_admin(message):
-                    if not disable_notify:
-                        await edit(message, f'`Non puoi usare questo comando`')
-                    message.continue_propagation()
-
-                if not compat:
-                    await func(client, message)
-                else:
-                    await func(message)
+                        message.stop_propagation()
+                await func(message)
             except FloodWait as e1:
                 LOGS.info(f"FloodWait ERROR: {e1}")
                 await asyncio.sleep(e1.value)
@@ -159,7 +133,7 @@ def message_deleted(**args):
     chat_id = args.get('chat_id', None)
 
     def msg_decorator(func):
-        async def wrap(client, message : pyrogram.types.list.List):
+        async def wrap(bot, message : pyrogram.types.list.List):
             try:
                 await func(message)
             except Exception as e:
