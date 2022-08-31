@@ -26,7 +26,7 @@ async def reply_img(
         pass
 
 
-def reply_audio(
+async def reply_audio(
     message,
     audio,
     caption='',
@@ -42,16 +42,16 @@ def reply_audio(
         if not duration:
             duration = get_duration(audio)
 
-        message.reply_audio(audio, caption=caption.strip(), duration=int(duration))
+        await message.reply_audio(audio, caption=caption.strip(), duration=int(duration))
         if delete_orig:
-            message.delete()
+            await message.delete()
         if delete_file:
             remove(audio)
     except BaseException:
         pass
 
 
-def reply_video(
+async def reply_video(
     message,
     video,
     caption='',
@@ -81,7 +81,7 @@ def reply_video(
         if len(caption) > 0 and fix_markdown:
             caption += MARKDOWN_FIX_CHAR
         if not duration:
-            message.reply_video(
+            await message.reply_video(
                 video,
                 caption=caption.strip(),
                 parse_mode=parse,
@@ -89,7 +89,7 @@ def reply_video(
                 progress=progress,
             )
         else:
-            message.reply_video(
+            await message.reply_video(
                 video,
                 caption=caption.strip(),
                 duration=int(duration),
@@ -98,7 +98,7 @@ def reply_video(
                 progress=progress,
             )
         if delete_orig:
-            message.delete()
+            await message.delete()
         if delete_file:
             remove(video)
     except BaseException as e:
@@ -106,7 +106,7 @@ def reply_video(
         pass
 
 
-def reply_voice(
+async def reply_voice(
     message,
     voice,
     caption='',
@@ -122,16 +122,16 @@ def reply_voice(
         if not duration:
             duration = get_duration(voice)
 
-        message.reply_voice(voice, caption=caption.strip(), duration=duration)
+        await message.reply_voice(voice, caption=caption.strip(), duration=duration)
         if delete_orig:
-            message.delete()
+            await message.delete()
         if delete_file:
             remove(voice)
     except BaseException:
         pass
 
 
-def reply_doc(
+async def reply_doc(
     message,
     doc,
     caption='',
@@ -144,11 +144,11 @@ def reply_doc(
         if len(caption) > 0 and fix_markdown:
             caption += MARKDOWN_FIX_CHAR
         if isinstance(doc, str):
-            message.reply_document(doc, caption=caption.strip(), progress=progress)
+            await message.reply_document(doc, caption=caption.strip(), progress=progress)
             if delete_after_send:
                 remove(doc)
         else:
-            message.reply_media_group(doc)
+            await message.reply_media_group(doc)
             if delete_after_send:
                 for media in doc:
                     remove(media.media)
@@ -158,22 +158,21 @@ def reply_doc(
         raise e
 
 
-def reply_sticker(message, sticker, delete_orig=False, delete_file=False):
+async def reply_sticker(message, sticker, delete_orig=False, delete_file=False):
     try:
-        message.reply_sticker(sticker)
+        await message.reply_sticker(sticker)
         if delete_orig:
-            message.delete()
+            await message.delete()
         if delete_file:
             remove(sticker)
     except BaseException:
         pass
 
 
-def reply_msg(message: Message, message2: Message, delete_orig=False):
+async def reply_msg(message: Message, message2: Message, delete_orig=False):
     try:
-        message2.copy(chat_id=message.chat.id, reply_to_message_id=message.id)
-
+        await message2.copy(chat_id=message.chat.id, reply_to_message_id=message.id)
         if delete_orig:
-            message.delete()
+            await message.delete()
     except Exception as e:
         raise e
