@@ -2,11 +2,12 @@ from os import path, remove
 
 from pyrogram import enums
 
+
 from ForwardBot.plugins.misc import MARKDOWN_FIX_CHAR, __status_out__, get_duration
 from pyrogram.types import Message
 
 async def reply_img(
-    message,
+    message: Message,
     photo,
     caption='',
     fix_markdown=False,
@@ -19,7 +20,7 @@ async def reply_img(
             caption += MARKDOWN_FIX_CHAR
         await message.reply_photo(photo, caption=caption.strip(), parse_mode=parse)
         if delete_orig:
-            message.delete()
+            await message.delete()
         if delete_file:
             remove(photo)
     except BaseException:
