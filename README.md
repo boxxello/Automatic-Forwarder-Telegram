@@ -25,6 +25,7 @@ folder where you placed the files on. <br>
 Type `pip install -r requirements.txt` to get all the requirements installed in one go. <br>
 Similar instructions applies for poetry.
 
+
 ---
 
 1. Install the required packages
@@ -35,7 +36,12 @@ Similar instructions applies for poetry.
 
 4. Run the script in terminal or deploy it into a docker container. (A [docker-compose.yml](docker-compose.yml) template can be found in the repo files) .
 
-5. `python -m ForwardBot` or if you want to deploy it to a docker container check [this file](Commands_to_deploy_img_docker.txt).
+5. **If you are trying to install this on windows machine** you'll have to either: <br>
+  - host your MongoDb database [download here for Windows users](https://www.mongodb.com/try/download/community) 
+  - provide a correct connection URI string for the MongoDB db [instructions can be found here](https://www.mongodb.com/docs/manual/reference/connection-string/) 
+  - deploy it with the docker MongoDB image.
+
+6. `python -m ForwardBot` or if you want to deploy it to a docker container check [this file](Commands_to_deploy_img_docker.txt).
 
 
 ## Support & Maintenance Notice
