@@ -1,2 +1,5 @@
+#Build the docker image + link the mongodb db.
 docker build . -t tg_fw_bot_pyro --no-cache
+
+#Deploy the container
 sudo docker-compose up -d
