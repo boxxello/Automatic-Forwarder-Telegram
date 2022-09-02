@@ -39,9 +39,9 @@ Similar instructions applies for poetry.
 5. **If you are trying to install this on windows machine** you'll have to either: <br>
     - host your MongoDb database [download here for Windows users](https://www.mongodb.com/try/download/community) 
     - provide a correct connection URI string for the MongoDB db [instructions can be found here](https://www.mongodb.com/docs/manual/reference/connection-string/) 
-    - deploy it with the docker MongoDB image.
+    - deploy it with the docker MongoDB image (the [docker-compose.yml](docker-compose.yml) contains already the template for it).
 
-6. `python -m ForwardBot` or if you want to deploy it to a docker container check [this file](Commands_to_deploy_img_docker.txt).
+6. Run the bot with `python -m ForwardBot` or if you want to deploy it to a docker container check [this file](Commands_to_deploy_img_docker.txt).
 
 
 ## Support & Maintenance Notice
