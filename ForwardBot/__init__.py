@@ -62,10 +62,13 @@ if Config.SUDO_USERS_INT is None:
 
 async def set_chat_id(bot: TelegramClient, channel_name: str) -> int:
     async for dialog in bot.get_dialogs():
-        if all([x in dialog.chat.title for x in channel_name.split(" ")]):
-            channel_id = dialog.chat.id
-            LOGS.info(f"{channel_name} chat found.")
-            return channel_id
+        print(f"{dialog.chat.title} checking with:  {channel_name}")
+        if dialog.chat.title:
+            if all([x in dialog.chat.title for x in channel_name.split(" ")]):
+                print("QUALCOSA SUCCEDE")
+                channel_id = dialog.chat.id
+                LOGS.info(f"{channel_name} chat found.")
+                return channel_id
     LOGS.warning(f"{Config.CHANNEL_NAME_CLIENT} chat not found.")
     sys.exit()
 

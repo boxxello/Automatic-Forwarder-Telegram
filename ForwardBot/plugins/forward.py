@@ -12,13 +12,14 @@ from ForwardBot import bot, Config, LOGS, collezione_get, collezione_fw, unwrap_
 from ForwardBot.SymbConfig import Symb_Config, BlacklistWords
 from ForwardBot.events import register, message_deleted
 
+
 @bot.on_message(filters=((filters.me | filters.incoming) & filters.chat(Config.CLIENT_CHANNEL_ID)), group=1)
 async def handler(bot, event: pyrogram.types.Message):
     LOGS.info(f"MESSAGE UPDATE {event}")
 
+
 @register(incoming=True, chat_id=Config.CLIENT_CHANNEL_ID)
 async def handler(event: pyrogram.types.Message):
-
     pickled_obj = pickle.dumps(event)
     # LOGS.info(event)
     # LOGS.info(new_dictionary)
@@ -36,7 +37,7 @@ async def handler(event: pyrogram.types.Message):
                 if the_Dict:
                     LOGS.info(f"ID OF THE EVENT THAT GOT THE REPLY: {the_Dict.get('id')}")
 
-                    other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}": the_Dict.get('id')})
+                    other_dict = await collezione_fw.find_one({f"{Config.SUFFIX_KEY_ID_DBMS}":  event.reply_to_message_id})
                     if other_dict is not None:
                         # get the data from it
                         data = other_dict['data']
@@ -116,7 +117,6 @@ async def send_msg_if_pattern_match(text_message: str, entities, messageid: int,
             f"Forwarded message id: {msgsent_.id}, Text in the message {msgsent_.text}")
         await collezione_fw.insert_one(dict_event)
 
-
     else:
         LOGS.info("NO MATCH")
     LOGS.info("-----BLOCK send_msg_if_pattern_match FINISH------")
@@ -192,7 +192,6 @@ async def check_entities(entities: Optional[list[MessageEntity]], prefix_length:
         if prefix_length != -1:
 
             for x in entities:
-
                 x.offset += prefix_length
 
     LOGS.info(entities)
@@ -375,5 +374,3 @@ async def handler(event: pyrogram.types.List):
             LOGS.warning("DELETE MESSAGE TEXT IS NONE AND IT WAS NOT FOUND IN THE COLLECTION")
 
     LOGS.info(f"----MESSAGE DELETED EVENT CAPTURED BLOCK END----")
-
-

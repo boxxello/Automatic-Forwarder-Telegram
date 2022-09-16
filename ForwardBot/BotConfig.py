@@ -18,7 +18,7 @@ class Config(object):
     API_ID = int(environ.get("TELEGRAM_API_ID", None))
     SUDO_USERS_INT = environ["SUDO_USERS"].split(SEP)
     API_HASH = environ.get("TELEGRAM_API_HASH", None)
-    BOT_PREFIX=environ.get("BOT_PREFIX", None)
+    BOT_PREFIX=environ.get("BOT_PREFIX", ".")
     CHANNEL_NAME_BOT = environ.get("CHANNEL_NAME_BOT", None)
     CHANNEL_NAME_CLIENT = environ.get("CHANNEL_NAME_CLIENT", None)
     CHANNEL_NAME_PING=environ.get("CHANNEL_NAME_PING", None)
